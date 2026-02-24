@@ -266,8 +266,9 @@ export function Agenda() {
               setEditingEvent(null);
               setModalOpen(true);
             }}
+            aria-label="Criar novo agendamento"
           >
-            + Novo atendimento / reunião
+            + Criar agendamento
           </button>
         )}
       </div>

@@ -9,13 +9,14 @@ import {
   addTicketComment,
   updateTicketStatus,
   updateTicketAssignment,
+  updateTicket,
   type TicketWithRelations,
 } from '../lib/tickets';
 import { fetchProfilesInUnit } from '../lib/agenda';
 import { fetchAssetsInUnit } from '../lib/assets';
 import { fetchAttachmentsByTicket, fetchAttachmentsByAsset, uploadAttachment, deleteAttachment, getAttachmentUrl } from '../lib/attachments';
 import { useAuth } from '../contexts/AuthContext';
-import type { TicketCategory, AttachmentCategory } from '../types';
+import type { TicketCategory, TicketPriority, AttachmentCategory } from '../types';
 import './Chamados.css';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -281,6 +282,7 @@ export function Chamados() {
           ticket={selectedTicket}
           unitId={activeUnitId}
           userId={user?.id}
+          categories={categories}
           onClose={() => setSelectedTicket(null)}
           onUpdate={() => {
             if (activeUnitId) {
@@ -439,12 +441,14 @@ function ChamadoDrawer({
   ticket,
   unitId,
   userId,
+  categories,
   onClose,
   onUpdate,
 }: {
   ticket: TicketWithRelations;
   unitId: string | null;
   userId: string | undefined;
+  categories: TicketCategory[];
   onClose: () => void;
   onUpdate: () => void;
 }) {
@@ -456,6 +460,12 @@ function ChamadoDrawer({
   const [attachments, setAttachments] = useState<{ id: string; file_name: string; file_path: string }[]>([]);
   const [attachmentUploading, setAttachmentUploading] = useState(false);
   const [attachmentCategory, setAttachmentCategory] = useState<AttachmentCategory>('outros');
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(ticket.title);
+  const [editDescription, setEditDescription] = useState(ticket.description ?? '');
+  const [editPriority, setEditPriority] = useState<TicketPriority>(ticket.priority);
+  const [editCategoryId, setEditCategoryId] = useState(ticket.category_id ?? '');
+  const [savingEdit, setSavingEdit] = useState(false);
   const ticketFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -470,6 +480,29 @@ function ChamadoDrawer({
     if (!unitId) return;
     fetchProfilesInUnit(unitId).then(({ profiles: p }) => setProfiles(p));
   }, [unitId]);
+
+  useEffect(() => {
+    setEditTitle(ticket.title);
+    setEditDescription(ticket.description ?? '');
+    setEditPriority(ticket.priority);
+    setEditCategoryId(ticket.category_id ?? '');
+  }, [ticket.id, ticket.title, ticket.description, ticket.priority, ticket.category_id]);
+
+  const handleSaveEdit = async () => {
+    if (!editTitle.trim()) return;
+    setSavingEdit(true);
+    const { error } = await updateTicket(ticket.id, {
+      title: editTitle.trim(),
+      description: editDescription.trim() || null,
+      priority: editPriority,
+      category_id: editCategoryId || null,
+    });
+    setSavingEdit(false);
+    if (!error) {
+      setEditing(false);
+      onUpdate();
+    }
+  };
 
   const handleAddComment = async () => {
     if (!newComment.trim() || sending) return;
@@ -508,13 +541,66 @@ function ChamadoDrawer({
           <button type="button" className="chamado-drawer-close" onClick={onClose} aria-label="Fechar">×</button>
         </div>
         <div className="chamado-drawer-body">
-          <p className="chamado-drawer-meta">
-            {ticket.category?.name ?? '—'} · {PRIORITY_LABEL[ticket.priority]} · {STATUS_LABEL[ticket.status]}
-          </p>
-          {ticket.description && <p className="chamado-drawer-desc">{ticket.description}</p>}
-          <p className="chamado-drawer-author">
-            Aberto por {ticket.author_profile?.full_name ?? '—'} em {new Date(ticket.created_at).toLocaleString('pt-BR')}
-          </p>
+          {editing ? (
+            <div className="chamado-drawer-edit-form">
+              <label className="chamado-drawer-edit-label">
+                Título *
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="chamado-drawer-input"
+                  placeholder="Título do chamado"
+                />
+              </label>
+              <label className="chamado-drawer-edit-label">
+                Descrição
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="chamado-drawer-input chamado-drawer-textarea"
+                  rows={3}
+                  placeholder="Descrição (opcional)"
+                />
+              </label>
+              <label className="chamado-drawer-edit-label">
+                Prioridade
+                <select value={editPriority} onChange={(e) => setEditPriority(e.target.value as TicketPriority)} className="chamado-drawer-input">
+                  {Object.entries(PRIORITY_LABEL).map(([v, l]) => (
+                    <option key={v} value={v}>{l}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="chamado-drawer-edit-label">
+                Categoria
+                <select value={editCategoryId} onChange={(e) => setEditCategoryId(e.target.value)} className="chamado-drawer-input">
+                  <option value="">— Nenhuma —</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="chamado-drawer-edit-actions">
+                <button type="button" className="chamado-comment-btn" onClick={handleSaveEdit} disabled={savingEdit || !editTitle.trim()}>
+                  {savingEdit ? 'Salvando…' : 'Salvar'}
+                </button>
+                <button type="button" className="chamado-btn-link" onClick={() => setEditing(false)}>Cancelar</button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="chamado-drawer-meta">
+                {ticket.category?.name ?? '—'} · {PRIORITY_LABEL[ticket.priority]} · {STATUS_LABEL[ticket.status]}
+              </p>
+              {ticket.description && <p className="chamado-drawer-desc">{ticket.description}</p>}
+              <p className="chamado-drawer-author">
+                Aberto por {ticket.author_profile?.full_name ?? '—'} em {new Date(ticket.created_at).toLocaleString('pt-BR')}
+              </p>
+              <button type="button" className="chamado-btn-link chamado-drawer-btn-edit" onClick={() => setEditing(true)}>
+                Editar chamado
+              </button>
+            </>
+          )}
 
           <div className="chamado-drawer-assign">
             <label>Responsável:</label>

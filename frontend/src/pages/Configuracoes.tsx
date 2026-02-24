@@ -31,7 +31,9 @@ import { fetchAbaTemplatesByUnit, createAbaTemplate, updateAbaTemplate, deleteAb
 import { fetchAppointmentTypesByUnit, createAppointmentType, updateAppointmentType, deleteAppointmentType } from '../lib/appointmentTypes';
 import { fetchPatientTagDefinitions, createPatientTagDefinition, updatePatientTagDefinition, deletePatientTagDefinition } from '../lib/patientTagDefinitions';
 import { fetchSpecialties, createSpecialty, updateSpecialty, deleteSpecialty } from '../lib/specialties';
+import { fetchJobTitles, createJobTitle, updateJobTitle, deleteJobTitle } from '../lib/jobTitles';
 import type { ConfigSpecialty } from '../lib/specialties';
+import type { ConfigJobTitle } from '../lib/jobTitles';
 import type { Unit, Room, Insurance, TicketCategory, Asset, NoteTemplate, AppointmentType } from '../types';
 import type { EvaluationTemplate, EvaluationType } from '../types';
 import type { AppRole } from '../types';
@@ -39,7 +41,7 @@ import type { PatientTagDefinition } from '../types';
 import type { UserWithUnits } from '../lib/users';
 import './Configuracoes.css';
 
-type ConfigTab = 'unidades' | 'tipos-atendimento' | 'convenios' | 'categorias' | 'tags-pacientes' | 'especialidades' | 'usuarios' | 'ativos' | 'templates' | 'templates-avaliacao' | 'templates-aba';
+type ConfigTab = 'unidades' | 'tipos-atendimento' | 'convenios' | 'categorias' | 'tags-pacientes' | 'especialidades' | 'cargos' | 'usuarios' | 'ativos' | 'templates' | 'templates-avaliacao' | 'templates-aba';
 
 export function Configuracoes() {
   const { user } = useAuth();
@@ -61,6 +63,7 @@ export function Configuracoes() {
   const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>([]);
   const [tagDefinitions, setTagDefinitions] = useState<PatientTagDefinition[]>([]);
   const [specialties, setSpecialties] = useState<ConfigSpecialty[]>([]);
+  const [jobTitles, setJobTitles] = useState<ConfigJobTitle[]>([]);
   const [loading, setLoading] = useState(false);
 
   const loadTagDefinitions = () => fetchPatientTagDefinitions().then(({ definitions: d }) => setTagDefinitions(d ?? []));
@@ -74,12 +77,14 @@ export function Configuracoes() {
   const loadAbaTemplates = () => activeUnitId && fetchAbaTemplatesByUnit(activeUnitId).then(({ templates: t }) => setAbaTemplates(t ?? []));
   const loadAppointmentTypes = () => activeUnitId && fetchAppointmentTypesByUnit(activeUnitId).then(({ types: t }) => setAppointmentTypes(t ?? []));
   const loadSpecialties = () => fetchSpecialties().then(({ list }) => setSpecialties(list));
+  const loadJobTitles = () => fetchJobTitles().then(({ list }) => setJobTitles(list ?? []));
 
   useEffect(() => { loadUnits(); }, []);
   useEffect(() => { if (tab === 'convenios') loadInsurances(); }, [tab]);
   useEffect(() => { if (tab === 'categorias') loadCategories(); }, [tab]);
   useEffect(() => { if (tab === 'tags-pacientes') loadTagDefinitions(); }, [tab]);
   useEffect(() => { if (tab === 'especialidades') loadSpecialties(); }, [tab]);
+  useEffect(() => { if (tab === 'cargos') loadJobTitles(); }, [tab]);
   useEffect(() => { if (tab === 'usuarios') loadUsers(); }, [tab]);
   useEffect(() => { if (tab === 'ativos' && activeUnitId) loadAssets(); }, [tab, activeUnitId]);
   useEffect(() => { if (tab === 'templates' && activeUnitId) loadTemplates(); }, [tab, activeUnitId]);
@@ -128,7 +133,7 @@ export function Configuracoes() {
       {isAdmin && (
         <>
           <div className="configuracoes-tabs">
-            {(['unidades', 'tipos-atendimento', 'convenios', 'categorias', 'tags-pacientes', 'especialidades', 'usuarios', 'ativos', 'templates', 'templates-avaliacao', 'templates-aba'] as ConfigTab[]).map((t) => (
+            {(['unidades', 'tipos-atendimento', 'convenios', 'categorias', 'tags-pacientes', 'especialidades', 'cargos', 'usuarios', 'ativos', 'templates', 'templates-avaliacao', 'templates-aba'] as ConfigTab[]).map((t) => (
               <button
                 key={t}
                 type="button"
@@ -141,6 +146,7 @@ export function Configuracoes() {
                 {t === 'categorias' && 'Categorias de chamados'}
                 {t === 'tags-pacientes' && 'Tags de pacientes'}
                 {t === 'especialidades' && 'Especialidades'}
+                {t === 'cargos' && 'Cargos'}
                 {t === 'usuarios' && 'Usuários'}
                 {t === 'ativos' && 'Ativos'}
                 {t === 'templates' && 'Templates de texto'}
@@ -167,6 +173,9 @@ export function Configuracoes() {
           )}
           {tab === 'especialidades' && (
             <ConfigEspecialidades items={specialties} onSaved={loadSpecialties} loading={loading} setLoading={setLoading} />
+          )}
+          {tab === 'cargos' && (
+            <ConfigCargos items={jobTitles} onSaved={loadJobTitles} loading={loading} setLoading={setLoading} />
           )}
           {tab === 'usuarios' && (
             <ConfigUsuarios users={users} units={units} onSaved={loadUsers} loading={loading} setLoading={setLoading} />
@@ -1325,6 +1334,93 @@ function ConfigEspecialidades({
               <td>
                 <button type="button" className="config-btn-edit" onClick={() => { setEditing(s); setName(s.name); setAdding(false); }}>Editar</button>
                 <button type="button" className="config-btn-delete" onClick={() => handleDelete(s.id)}>Excluir</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      )}
+    </div>
+  );
+}
+
+function ConfigCargos({
+  items,
+  onSaved,
+  loading,
+  setLoading,
+}: {
+  items: ConfigJobTitle[];
+  onSaved: () => void;
+  loading: boolean;
+  setLoading: (v: boolean) => void;
+}) {
+  const [editing, setEditing] = useState<ConfigJobTitle | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [name, setName] = useState('');
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setLoading(true);
+    const { error } = await createJobTitle(name.trim());
+    setLoading(false);
+    if (!error) { setAdding(false); setName(''); onSaved(); }
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    setLoading(true);
+    const { error } = await updateJobTitle(editing.id, name.trim());
+    setLoading(false);
+    if (!error) { setEditing(null); onSaved(); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Excluir este cargo? Perfis que usam continuarão com o nome no texto.')) return;
+    setLoading(true);
+    const { error } = await deleteJobTitle(id);
+    setLoading(false);
+    if (!error) onSaved();
+  };
+
+  return (
+    <div className="config-block">
+      <p className="config-unit-note">Cargos/funções que o admin cadastra. Usados em Meu Perfil para definir a função do usuário.</p>
+      <div className="config-toolbar">
+        {!adding && !editing && (
+          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); setName(''); }}>+ Novo cargo</button>
+        )}
+      </div>
+      {(adding || editing) && (
+        <form onSubmit={editing ? handleEdit : handleAdd} className="config-form config-form-labeled">
+          <h3 className="config-form-title">{editing ? 'Editar cargo' : 'Novo cargo'}</h3>
+          <label className="config-form-label-block">
+            <span>Nome *</span>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Terapeuta, Coordenador" required className="config-input" />
+          </label>
+          <div className="config-form-actions">
+            <button type="submit" className="config-btn-save" disabled={loading}>{editing ? 'Salvar' : 'Criar'}</button>
+            <button type="button" className="config-btn-cancel" onClick={() => { setAdding(false); setEditing(null); }}>Cancelar</button>
+          </div>
+        </form>
+      )}
+      {items.length === 0 && !adding && !editing ? (
+        <div className="config-empty">
+          <p>Nenhum cargo cadastrado.</p>
+          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); setName(''); }}>+ Criar primeiro cargo</button>
+        </div>
+      ) : (
+      <table className="config-table">
+        <thead><tr><th>Nome</th><th></th></tr></thead>
+        <tbody>
+          {items.map((c) => (
+            <tr key={c.id}>
+              <td>{c.name}</td>
+              <td>
+                <button type="button" className="config-btn-edit" onClick={() => { setEditing(c); setName(c.name); setAdding(false); }}>Editar</button>
+                <button type="button" className="config-btn-delete" onClick={() => handleDelete(c.id)}>Excluir</button>
               </td>
             </tr>
           ))}

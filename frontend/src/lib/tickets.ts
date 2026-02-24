@@ -195,6 +195,29 @@ export async function updateTicketAssignment(id: string, assigned_to: string | n
   return { ticket: data as Ticket | null, error };
 }
 
+export type UpdateTicketPayload = {
+  title?: string;
+  description?: string | null;
+  priority?: import('../types').TicketPriority;
+  category_id?: string | null;
+};
+
+export async function updateTicket(id: string, payload: UpdateTicketPayload) {
+  const { data, error } = await supabase
+    .from('tickets')
+    .update({
+      ...(payload.title !== undefined && { title: payload.title }),
+      ...(payload.description !== undefined && { description: payload.description }),
+      ...(payload.priority !== undefined && { priority: payload.priority }),
+      ...(payload.category_id !== undefined && { category_id: payload.category_id }),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select()
+    .single();
+  return { ticket: data as Ticket | null, error };
+}
+
 export async function addTicketComment(ticketId: string, content: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { comment: null, error: new Error('Não autenticado') };

@@ -47,12 +47,16 @@ Usar no **.env** local (pasta `frontend/` ou raiz) e no **Render → Environment
 
 ### Scripts locais (opcional)
 
-Apenas para rodar `frontend/scripts/create-storage-buckets.mjs`. **Não** usar no frontend nem no Render.
+Para rodar `frontend/scripts/create-storage-buckets.mjs` e `frontend/scripts/create-first-admin.mjs`. **Não** usar no frontend nem no Render.
 
 | Variável | Descrição |
 |----------|-----------|
 | **SUPABASE_URL** | Mesmo valor de `VITE_SUPABASE_URL` |
 | **SUPABASE_SERVICE_ROLE_KEY** | Supabase Dashboard → Project Settings → API → **service_role** (secret). Nunca expor no frontend. |
+| **ADMIN_EMAIL** | (Só create-first-admin) E-mail do primeiro admin. Ex.: `joao.victor@grupoequidade.com.br` |
+| **ADMIN_PASSWORD** | (Só create-first-admin) Senha do primeiro admin. |
+| **ADMIN_NAME** | (Só create-first-admin) Nome completo. Ex.: `João Victor G. Pawlowicz` |
+| **UNIT_ID** | (Só create-first-admin, opcional) UUID da unidade. Se não informado, usa a primeira unidade. |
 
 ### Opcional (Docker + Cloudflare Tunnel)
 
