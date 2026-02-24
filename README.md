@@ -128,3 +128,4 @@ Ou use `docker-compose.yml` com as variáveis em `.env`.
 ---
 
 *EquidadePlus — gestão de clínicas multi-unidade.*
+# SistemaEquidadeplus
