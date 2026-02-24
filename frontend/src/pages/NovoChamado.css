@@ -1,0 +1,106 @@
+.novo-chamado-page {
+  padding: 24px;
+  max-width: 640px;
+}
+
+.novo-chamado-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.novo-chamado-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.novo-chamado-back {
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.novo-chamado-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.novo-chamado-error {
+  margin: 0;
+  padding: 12px;
+  background: #fee;
+  color: #c00;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.novo-chamado-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.novo-chamado-input,
+.novo-chamado-textarea,
+.novo-chamado-select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.novo-chamado-textarea {
+  resize: vertical;
+}
+
+.novo-chamado-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.novo-chamado-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.novo-chamado-btn-cancel {
+  padding: 10px 20px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.novo-chamado-btn-submit {
+  padding: 10px 20px;
+  background: #4361ee;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.novo-chamado-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.novo-chamado-btn-submit:hover:not(:disabled) {
+  background: #3651d4;
+}

@@ -1,0 +1,466 @@
+.chamados-page {
+  padding: 24px;
+}
+
+.chamados-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.chamados-paciente-filter {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.chamados-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.chamados-actions .chamados-btn-new {
+  padding: 10px 16px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.chamados-actions .chamados-btn-new:hover {
+  background: var(--color-primary-hover);
+}
+
+.chamados-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.chamados-tab {
+  padding: 8px 16px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.chamados-tab.is-active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.chamados-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.chamados-filter-select {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.chamados-loading {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chamados-table-wrap {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.chamados-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.chamados-table th,
+.chamados-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.chamados-table th {
+  background: var(--color-bg-subtle);
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.chamados-table tbody tr:nth-child(even) {
+  background: #fafbfc;
+}
+
+.chamados-row {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.chamados-row:hover {
+  background: var(--color-primary-light);
+}
+
+.chamados-ticket-title {
+  font-weight: 500;
+}
+
+.chamados-priority { font-weight: 500; }
+.chamados-priority-baixa { color: var(--color-success); }
+.chamados-priority-media { color: var(--color-warning); }
+.chamados-priority-alta { color: #fd7e14; }
+.chamados-priority-urgente { color: var(--color-danger); }
+
+.chamados-btn-open {
+  padding: 6px 12px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.chamados-btn-open:hover {
+  background: var(--color-primary-hover);
+}
+
+.chamados-empty {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+.chamados-empty::before {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  background: var(--color-border-light);
+  border-radius: 50%;
+}
+
+/* Drawer */
+.chamado-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  animation: chamado-drawer-fadeIn var(--transition-normal) ease forwards;
+}
+
+@keyframes chamado-drawer-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.chamado-drawer {
+  width: 100%;
+  max-width: 480px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
+  overflow: hidden;
+  animation: chamado-drawer-slideIn 0.25s ease forwards;
+}
+
+@keyframes chamado-drawer-slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.chamado-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.chamado-drawer-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.chamado-drawer-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.chamado-drawer-close:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+}
+
+.chamado-drawer-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.chamado-drawer-meta {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.chamado-drawer-desc {
+  margin: 0 0 12px;
+  white-space: pre-wrap;
+}
+
+.chamado-drawer-author {
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.chamado-drawer-section { margin-bottom: 16px; }
+.chamado-drawer-section h3 { margin: 0 0 8px; font-size: 0.95rem; font-weight: 600; color: #333; }
+.chamado-drawer-ticket-list { list-style: none; margin: 0; padding: 0; }
+.chamado-drawer-ticket-list li { margin: 6px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.chamado-drawer-ticket-meta { font-size: 0.85rem; color: #666; }
+.chamado-drawer-assign { margin-bottom: 16px; }
+.chamado-drawer-assign label { display: block; font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 4px; }
+.chamado-assign-select { padding: 6px 10px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 6px; min-width: 200px; }
+
+.chamado-drawer-attachments {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.chamado-drawer-attachments h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.chamado-drawer-attachments-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.chamado-drawer-attachments-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.chamado-drawer-attachments-list a {
+  color: var(--color-primary);
+  font-size: 0.9rem;
+}
+
+.chamado-drawer-comments h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.chamado-comment {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.chamado-comment-date {
+  margin-left: 8px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.chamado-comment p {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.chamado-comment-form {
+  margin-top: 12px;
+}
+
+.chamado-comment-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.chamado-comment-btn {
+  margin-top: 8px;
+  padding: 8px 16px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.chamado-comment-btn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.chamado-comment-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.chamado-drawer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.chamado-btn-status {
+  padding: 8px 14px;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.chamado-btn-status.resolvido {
+  background: var(--color-success);
+  color: #fff;
+  border-color: var(--color-success);
+}
+
+.chamado-btn-status:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.chamados-view-toggle {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.chamados-view-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.chamados-view-btn.is-active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.chamados-kanban {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  min-height: 400px;
+}
+
+.chamados-kanban-column {
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-light);
+}
+
+.chamados-kanban-column-title {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.chamados-kanban-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.chamados-kanban-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.chamados-kanban-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.chamados-kanban-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 6px rgba(67, 97, 238, 0.15);
+}
+
+.chamados-kanban-card-title {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.chamados-kanban-card-meta {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}

@@ -1,0 +1,36 @@
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.empty-state-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 16px;
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  border-radius: 50%;
+}
+
+.empty-state-title {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.empty-state-description {
+  margin: 0 0 20px;
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.empty-state-action {
+  margin-top: 16px;
+}

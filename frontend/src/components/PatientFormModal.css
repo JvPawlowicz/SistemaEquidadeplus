@@ -1,0 +1,218 @@
+.patient-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: patient-form-overlay-in 0.2s ease forwards;
+}
+
+@keyframes patient-form-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.patient-form-modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  animation: patient-form-modal-in 0.25s ease forwards;
+}
+
+@keyframes patient-form-modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.patient-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.patient-form-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.patient-form-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.patient-form-close:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+}
+
+.patient-form-body {
+  padding: 20px 24px 24px;
+}
+
+.patient-form-section {
+  margin-bottom: 24px;
+}
+
+.patient-form-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.patient-form-section-title {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.patient-form-error {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  background: rgba(197, 34, 31, 0.08);
+  color: var(--color-danger);
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(197, 34, 31, 0.2);
+}
+
+.patient-form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.patient-form-label:last-child {
+  margin-bottom: 0;
+}
+
+.patient-form-input {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.patient-form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.patient-form-actions {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.patient-form-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.patient-form-btn-cancel {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.patient-form-btn-cancel:hover {
+  background: var(--color-bg-subtle);
+}
+
+.patient-form-btn-submit {
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.patient-form-btn-submit:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.patient-form-btn-submit:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.patient-form-spinner {
+  animation: spin 0.7s linear infinite;
+}
+
+.patient-form-cep-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.patient-form-cep-input {
+  width: 120px;
+}
+
+.patient-form-btn-cep {
+  padding: 8px 14px;
+  border: 1px solid var(--color-primary);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: 0.9rem;
+}
+
+.patient-form-btn-cep:hover:not(:disabled) {
+  background: var(--color-primary-light);
+}
+
+.patient-form-btn-cep:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.patient-form-cep-error {
+  font-size: 0.85rem;
+  color: var(--color-danger);
+  margin-top: 4px;
+  display: block;
+}

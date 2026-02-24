@@ -1,0 +1,318 @@
+.editor-evolucao-page {
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.editor-evolucao-loading {
+  margin: 0 0 16px;
+  color: #666;
+}
+
+.editor-evolucao-back {
+  margin-bottom: 16px;
+  padding: 8px 0;
+  background: none;
+  border: none;
+  color: #4361ee;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.editor-evolucao-back:hover {
+  text-decoration: underline;
+}
+
+.editor-evolucao-header {
+  margin-bottom: 20px;
+}
+
+.editor-evolucao-title {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.editor-evolucao-meta {
+  margin-top: 8px;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.editor-evolucao-datetime,
+.editor-evolucao-patient,
+.editor-evolucao-finalized,
+.editor-evolucao-cosign {
+  margin: 4px 0 0;
+}
+
+.editor-evolucao-goals {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.editor-evolucao-goals-title {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.editor-evolucao-goals-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.editor-evolucao-goals-list li {
+  margin: 6px 0;
+}
+
+.editor-evolucao-goals-list label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.editor-evolucao-aba-coleta {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.editor-evolucao-aba-coleta-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.editor-evolucao-aba-coleta-item {
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.editor-evolucao-aba-coleta-label {
+  min-width: 140px;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.editor-evolucao-aba-coleta-input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  width: 100px;
+}
+
+.editor-evolucao-tags {
+  margin-top: 12px;
+}
+
+.editor-evolucao-tags-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.editor-evolucao-tags-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.editor-evolucao-error {
+  margin: 0 0 16px;
+  padding: 12px;
+  background: #fee;
+  color: #c33;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.editor-evolucao-secretaria {
+  padding: 24px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  color: #555;
+}
+
+.editor-evolucao-secretaria p {
+  margin: 0 0 8px;
+}
+
+.editor-evolucao-template-select {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-right: 8px;
+}
+
+.editor-evolucao-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.editor-evolucao-saving {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.editor-evolucao-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.editor-evolucao-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.editor-evolucao-btn-primary {
+  background: #4361ee;
+  color: #fff;
+}
+
+.editor-evolucao-btn-primary:hover:not(:disabled) {
+  background: #3651d4;
+}
+
+.editor-evolucao-btn-secondary {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.editor-evolucao-btn-secondary:hover {
+  background: #d0d0d0;
+}
+
+.editor-evolucao-btn-success {
+  background: #0f9d58;
+  color: #fff;
+}
+
+.editor-evolucao-btn-success:hover {
+  background: #0d8a4c;
+}
+
+.editor-evolucao-textarea {
+  width: 100%;
+  min-height: 320px;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.editor-evolucao-textarea:focus {
+  outline: none;
+  border-color: #4361ee;
+  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+}
+
+.editor-evolucao-textarea:disabled {
+  background: #f5f5f5;
+  color: #555;
+}
+
+.editor-evolucao-addendum {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.editor-evolucao-addendum-title {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.editor-evolucao-addendum-content {
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #f8f8f8;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+}
+
+.editor-evolucao-addendum-content pre {
+  margin: 0;
+  font-family: inherit;
+}
+
+.editor-evolucao-addendum-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.editor-evolucao-addendum-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+.editor-evolucao-addendum-textarea:focus {
+  outline: none;
+  border-color: #4361ee;
+}
+
+.editor-evolucao-attachments {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.editor-evolucao-file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.editor-evolucao-attachments-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.editor-evolucao-attachments-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+}
+
+.editor-evolucao-attachments-list a {
+  color: #4361ee;
+  font-size: 0.9rem;
+}

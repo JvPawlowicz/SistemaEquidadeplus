@@ -1,0 +1,19 @@
+# Dependencies and build
+node_modules
+dist
+*.local
+
+# Env (nunca commitar chaves)
+.env
+.env.*
+!.env.example
+
+# Logs e cache
+*.log
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# Supabase CLI temp
+supabase/.temp

@@ -1,0 +1,218 @@
+.event-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1100;
+  display: flex;
+  justify-content: flex-end;
+  animation: event-drawer-fadeIn var(--transition-normal) ease forwards;
+}
+
+@keyframes event-drawer-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.event-drawer {
+  width: 100%;
+  max-width: 400px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: event-drawer-slideIn 0.25s ease forwards;
+}
+
+@keyframes event-drawer-slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.event-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.event-drawer-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.event-drawer-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.event-drawer-close:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+}
+
+.event-drawer-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.event-drawer-datetime {
+  margin: 0 0 16px;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.event-drawer-meta {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.event-drawer-actions {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.event-drawer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  text-decoration: none;
+  background: var(--color-primary);
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.event-drawer-btn:hover {
+  background: var(--color-primary-hover);
+  color: #fff;
+}
+
+.event-drawer-btn-secondary {
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.event-drawer-btn-secondary:hover {
+  background: var(--color-border-light);
+  color: var(--color-text);
+}
+
+.event-drawer-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.event-drawer-btn-success {
+  background: var(--color-success);
+}
+
+.event-drawer-btn-success:hover {
+  background: var(--color-success-hover);
+}
+
+.event-drawer-btn-warning {
+  background: var(--color-warning);
+  color: var(--color-text);
+}
+
+.event-drawer-btn-warning:hover {
+  opacity: 0.9;
+}
+
+.event-drawer-btn-danger {
+  background: var(--color-danger);
+}
+
+.event-drawer-btn-danger:hover {
+  background: var(--color-danger-hover);
+}
+
+.event-drawer-motivo {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+}
+
+.event-drawer-motivo label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.event-drawer-motivo input {
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.event-drawer-motivo-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.event-drawer-reopen {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-drawer-reopen-input {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.event-drawer-reopen .event-drawer-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.event-drawer-file-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.event-drawer-attach-msg {
+  font-size: 0.85rem;
+  color: var(--color-success);
+}
+.event-drawer-attach-msg:empty {
+  display: none;
+}

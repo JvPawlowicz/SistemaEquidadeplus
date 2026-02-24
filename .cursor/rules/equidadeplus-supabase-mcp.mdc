@@ -1,0 +1,39 @@
+---
+description: Contexto do projeto Equidade+ para uso do MCP Supabase e deploy (Render). Consultar MCP_CONTEXT.md para detalhes.
+globs: 
+alwaysApply: true
+---
+
+# Equidade+ – Supabase e MCP
+
+## Contexto do projeto
+
+- **Sistema**: Equidade+ (gestão clínica: pacientes, agenda, prontuário, usuários por unidade, ABA, avaliações, chamados).
+- **Stack**: Frontend React (Vite) + Supabase (Auth, DB, Storage, Edge Functions).
+- **Deploy**: Frontend estático (ex.: Render); Supabase hospedado.
+
+## Ao usar o MCP Supabase
+
+1. **project_id**: Usar o project ref do Supabase do projeto Equidade+. Está na URL do Dashboard: `https://supabase.com/dashboard/project/<PROJECT_REF>`. Se não souber, o usuário deve informar ou consultar `list_projects`.
+
+2. **Schema**: As tabelas e colunas estão descritas em **MCP_CONTEXT.md** (raiz do repo). Migrations em `supabase/migrations/` da 00001 à 00027. Para conferir o estado atual do banco, use `list_tables` com `project_id` e `schemas: ["public"]`.
+
+3. **Migrations**: Ao aplicar DDL, usar `apply_migration` com `project_id`, `name` em snake_case e `query` com o SQL. Novas migrations devem ser criadas em `supabase/migrations/` com numeração sequencial (00028_...).
+
+4. **Edge Functions**: São duas: `invite-user` e `reset-password`. Ambas exigem JWT e checam se o usuário é admin em `user_units`. Ao fazer deploy via MCP, usar `deploy_edge_function` com `verify_jwt: true`. Código em `supabase/functions/<nome>/index.ts`.
+
+5. **Storage**: Buckets `avatars`, `attachments`, `patients` (todos públicos). Políticas RLS nas migrations 00011, 00012, 00014. Script de criação: `frontend/scripts/create-storage-buckets.mjs`.
+
+## Documentação de referência
+
+- **MCP_CONTEXT.md** (raiz): lista de migrations, tabelas, buckets, Edge Functions, variáveis de ambiente, deploy Render.
+- **PRODUCAO.md**: checklist completo de produção (migrations, buckets, Edge Functions, SMTP, frontend, Auth URLs).
+- **supabase/APLICAR_MIGRATIONS.md**: como aplicar migrations (CLI ou SQL Editor).
+- **supabase/DEPLOY_FUNCOES.md**: deploy das Edge Functions.
+
+## Deploy Render
+
+- Build: `cd frontend && npm ci && npm run build`
+- Publish: `frontend/dist`
+- Env: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+- No Supabase Auth, configurar Site URL e Redirect URLs para a URL do Render.

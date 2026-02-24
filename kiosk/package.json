@@ -1,0 +1,33 @@
+{
+  "name": "equidadeplus-kiosk",
+  "version": "1.0.0",
+  "description": "Modo kiosk para EquidadePlus - abre o sistema em tela cheia",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build": "electron-builder --mac --win"
+  },
+  "build": {
+    "appId": "com.equidadeplus.kiosk",
+    "productName": "EquidadePlus Kiosk",
+    "directories": { "output": "dist" },
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": ["dmg"]
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": true,
+      "createDesktopShortcut": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  }
+}

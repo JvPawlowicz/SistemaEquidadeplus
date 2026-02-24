@@ -1,0 +1,91 @@
+.agenda-page {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 56px - 48px);
+}
+
+.agenda-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.agenda-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.agenda-btn-new {
+  padding: 10px 16px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.agenda-btn-new:hover {
+  background: var(--color-primary-hover);
+}
+
+.agenda-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.agenda-filter-select {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.agenda-loading {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agenda-calendar-wrap {
+  flex: 1;
+  min-height: 500px;
+}
+
+.agenda-calendar-wrap .rbc-calendar {
+  font-family: inherit;
+}
+
+.agenda-calendar-wrap .rbc-toolbar button {
+  color: var(--color-text);
+}
+
+.agenda-calendar-wrap .rbc-event {
+  background: var(--color-primary);
+  border: none;
+}
+
+.agenda-calendar-wrap .rbc-today {
+  background: var(--color-primary-light);
+}
+
+.agenda-density-compacta .rbc-month-view,
+.agenda-density-compacta .rbc-time-view { font-size: 0.85rem; }
+.agenda-density-compacta .rbc-event { padding: 0 4px; font-size: 0.8rem; }
+.agenda-density-compacta .rbc-time-slot { min-height: 24px; }
+.agenda-density-compacta .rbc-day-slot .rbc-time-slot { min-height: 20px; }

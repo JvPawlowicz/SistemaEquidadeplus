@@ -1,0 +1,22 @@
+# Render Blueprint - EquidadePlus
+# https://render.com/docs/blueprint-spec
+# Conecte o repositório no Render e use "Apply" ou crie o Static Site manualmente com os dados abaixo.
+
+services:
+  - type: web
+    name: equidadeplus
+    runtime: static
+    # Build do frontend Vite
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: frontend/dist
+    # SPA: todas as rotas redirecionam para index.html
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    # Variáveis obrigatórias: defina no Dashboard (Environment) do serviço
+    envVars:
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
