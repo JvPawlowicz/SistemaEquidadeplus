@@ -26,6 +26,16 @@
   color: #eee;
   text-decoration: none;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-logo-img {
+  height: 32px;
+  width: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .navbar-logo:hover {
@@ -92,7 +102,7 @@
 }
 
 .navbar-unit-option.is-active {
-  background: rgba(67, 97, 238, 0.35);
+  background: var(--color-nav-accent);
   color: #fff;
 }
 
@@ -131,7 +141,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: #fff;
   text-decoration: none;
   font-size: 0.9rem;
@@ -141,7 +151,7 @@
 }
 
 .navbar-btn-chamado:hover {
-  background: var(--color-primary-hover);
+  background: var(--color-accent-hover);
   color: #fff;
 }
 
@@ -177,11 +187,12 @@
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
-  min-width: 160px;
+  min-width: 180px;
   padding: 6px 0;
   background: var(--color-nav-panel);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
+  z-index: 1001;
 }
 
 .navbar-user-item {
@@ -189,7 +200,9 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 10px 16px;
+  padding: 12px 16px;
+  min-height: 44px;
+  box-sizing: border-box;
   color: #eee;
   text-decoration: none;
   font-size: 0.9rem;
@@ -209,4 +222,52 @@
 
 .navbar-user-item-sair:hover {
   background: rgba(224, 124, 124, 0.15);
+}
+
+@media (max-width: 1024px) {
+  .navbar-left {
+    gap: 12px;
+  }
+
+  .navbar-menu {
+    gap: 4px;
+  }
+
+  .navbar-link span {
+    display: none;
+  }
+
+  .navbar-link {
+    padding: 8px 10px;
+  }
+
+  .navbar-btn-chamado span {
+    display: none;
+  }
+
+  .navbar-user-trigger span {
+    display: none;
+  }
+
+  .navbar-logo span {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar {
+    padding: 0 8px;
+  }
+
+  .navbar-unit-trigger {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .navbar-user-menu {
+    right: 0;
+    left: auto;
+    min-width: 160px;
+  }
 }

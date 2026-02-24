@@ -12,6 +12,9 @@
   --color-primary: #4361ee;
   --color-primary-hover: #3651d4;
   --color-primary-light: rgba(67, 97, 238, 0.08);
+  --color-accent: #0d9488;
+  --color-accent-hover: #0f766e;
+  --color-accent-light: rgba(13, 148, 136, 0.12);
   --color-surface: #ffffff;
   --color-bg: #f5f5f8;
   --color-bg-subtle: #f8f9fa;
@@ -27,6 +30,7 @@
   --color-danger-hover: #a91c1a;
   --color-nav: #1a1a2e;
   --color-nav-panel: #252538;
+  --color-nav-accent: rgba(13, 148, 136, 0.25);
 
   /* Espaçamento e raios */
   --radius-sm: 6px;

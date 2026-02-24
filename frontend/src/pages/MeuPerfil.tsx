@@ -163,7 +163,18 @@ export function MeuPerfil() {
           <div className="meu-perfil-avatar-row">
             {avatarUrl ? (
               <div className="meu-perfil-avatar-preview-wrap">
-                <img src={avatarUrl} alt="Avatar" className="meu-perfil-avatar-preview" />
+                <img
+                  src={avatarUrl}
+                  alt="Avatar"
+                  className="meu-perfil-avatar-preview"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const wrap = e.currentTarget.closest('.meu-perfil-avatar-preview-wrap');
+                    const placeholder = wrap?.querySelector('.meu-perfil-avatar-placeholder');
+                    if (placeholder instanceof HTMLElement) placeholder.style.display = 'flex';
+                  }}
+                />
+                <div className="meu-perfil-avatar-placeholder" style={{ display: 'none' }}>Sem foto</div>
                 <button
                   type="button"
                   className="meu-perfil-avatar-remove"

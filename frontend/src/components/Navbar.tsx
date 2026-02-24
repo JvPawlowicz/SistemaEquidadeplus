@@ -62,7 +62,8 @@ export function Navbar() {
     <header className="navbar">
       <div className="navbar-left">
         <Link to="/agenda" className="navbar-logo">
-          EquidadePlus
+          <img src="/logo/logo.png" alt="EquidadePlus" className="navbar-logo-img" />
+          <span>EquidadePlus</span>
         </Link>
 
         <div className="navbar-unit" ref={unitDropdownRef}>

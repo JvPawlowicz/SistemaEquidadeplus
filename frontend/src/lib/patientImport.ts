@@ -69,12 +69,34 @@ function norm(s: unknown): string {
   return t;
 }
 
+/** Converte valor da célula (string ou número Excel serial) para data no formato YYYY-MM-DD. Evita "time zone displacement out of range" no Postgres. */
 function normDate(s: unknown): string {
+  if (s == null) return '';
+  if (typeof s === 'number') {
+    if (s < 1 || s > 100000) return '';
+    const date = excelSerialToDate(s);
+    if (!date) return '';
+    return date.toISOString().slice(0, 10);
+  }
+  if (s instanceof Date) {
+    if (Number.isNaN(s.getTime())) return '';
+    return s.toISOString().slice(0, 10);
+  }
   const t = norm(s);
   if (!t) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
   const d = new Date(t);
-  if (Number.isNaN(d.getTime())) return t;
+  if (Number.isNaN(d.getTime())) return '';
   return d.toISOString().slice(0, 10);
+}
+
+/** Excel: serial 1 = 1900-01-01. Converte para Date. */
+function excelSerialToDate(serial: number): Date | null {
+  if (serial < 1) return null;
+  const utcMs = (serial - 25569) * 86400 * 1000;
+  const d = new Date(utcMs);
+  if (Number.isNaN(d.getTime())) return null;
+  return d;
 }
 
 /**
@@ -161,9 +183,10 @@ export function parsedRowToPayload(
   row: ParsedRow,
   insuranceId: string | null
 ): Omit<import('../types').Patient, 'id' | 'created_at' | 'updated_at'> {
+  const birthDateOnly = row.birth_date.slice(0, 10);
   return {
     full_name: row.full_name,
-    birth_date: row.birth_date,
+    birth_date: birthDateOnly,
     photo_url: null,
     address: row.address,
     document: row.document,
