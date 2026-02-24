@@ -27,7 +27,7 @@ import { fetchCep, formatCep, getTimezoneFromState } from '../lib/cep';
 import { fetchAssetsInUnit, createAsset, updateAsset, deleteAsset } from '../lib/assets';
 import { fetchNoteTemplates, createNoteTemplate, updateNoteTemplate, deleteNoteTemplate } from '../lib/noteTemplates';
 import { fetchTemplatesByUnit, createTemplate, updateTemplate, deleteTemplate, cloneTemplateAsNewVersion } from '../lib/avaliacoes';
-import { fetchAbaTemplatesByUnit, createAbaTemplate, updateAbaTemplate, deleteAbaTemplate, fetchAbaTemplateGoals, createAbaTemplateGoal, deleteAbaTemplateGoal, type AbaTemplate } from '../lib/abaTemplates';
+import { fetchAbaTemplatesByUnit, createAbaTemplate, updateAbaTemplate, deleteAbaTemplate, type AbaTemplate } from '../lib/abaTemplates';
 import { fetchAppointmentTypesByUnit, createAppointmentType, updateAppointmentType, deleteAppointmentType } from '../lib/appointmentTypes';
 import { fetchPatientTagDefinitions, createPatientTagDefinition, updatePatientTagDefinition, deletePatientTagDefinition } from '../lib/patientTagDefinitions';
 import { fetchSpecialties, createSpecialty, updateSpecialty, deleteSpecialty } from '../lib/specialties';
@@ -51,7 +51,6 @@ export function Configuracoes() {
   );
 
   const [units, setUnits] = useState<Unit[]>([]);
-  const [rooms, setRooms] = useState<Room[]>([]);
   const [insurances, setInsurances] = useState<Insurance[]>([]);
   const [categories, setCategories] = useState<TicketCategory[]>([]);
   const [users, setUsers] = useState<UserWithUnits[]>([]);

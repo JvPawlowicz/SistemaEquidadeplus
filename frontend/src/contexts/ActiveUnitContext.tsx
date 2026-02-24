@@ -91,7 +91,8 @@ export function ActiveUnitProvider({ children }: { children: ReactNode }) {
   const activeUnit = activeUnitId
     ? units.find((u) => u.id === activeUnitId) ?? null
     : null;
-  const timezone = activeUnit?.timezone ?? (typeof Intl !== 'undefined' && Intl.DateTimeFormat?.().resolvedOptions?.().timeZone) ?? 'America/Sao_Paulo';
+  const tzRaw = activeUnit?.timezone ?? (typeof Intl !== 'undefined' ? Intl.DateTimeFormat?.().resolvedOptions?.().timeZone : null);
+  const timezone: string = typeof tzRaw === 'string' ? tzRaw : 'America/Sao_Paulo';
 
   const value: ActiveUnitContextValue = {
     units,
