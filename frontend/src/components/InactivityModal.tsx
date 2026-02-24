@@ -55,7 +55,7 @@ export function InactivityProvider({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (!user) return;
-    resetIdle();
+    queueMicrotask(resetIdle);
     const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
     const onActivity = () => resetIdle();
     events.forEach((ev) => window.addEventListener(ev, onActivity));

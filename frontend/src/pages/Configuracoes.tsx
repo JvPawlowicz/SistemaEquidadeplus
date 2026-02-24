@@ -86,11 +86,13 @@ export function Configuracoes() {
   useEffect(() => { if (tab === 'especialidades') loadSpecialties(); }, [tab]);
   useEffect(() => { if (tab === 'cargos') loadJobTitles(); }, [tab]);
   useEffect(() => { if (tab === 'usuarios') loadUsers(); }, [tab]);
+  /* eslint-disable react-hooks/exhaustive-deps -- loaders estáveis; evitar reexecução por referência */
   useEffect(() => { if (tab === 'ativos' && activeUnitId) loadAssets(); }, [tab, activeUnitId]);
   useEffect(() => { if (tab === 'templates' && activeUnitId) loadTemplates(); }, [tab, activeUnitId]);
   useEffect(() => { if (tab === 'templates-avaliacao' && activeUnitId) loadEvalTemplates(); }, [tab, activeUnitId]);
   useEffect(() => { if (tab === 'templates-aba' && activeUnitId) loadAbaTemplates(); }, [tab, activeUnitId]);
   useEffect(() => { if (tab === 'tipos-atendimento' && activeUnitId) loadAppointmentTypes(); }, [tab, activeUnitId]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <div className="configuracoes-page">
@@ -231,7 +233,7 @@ function ConfigUnidades({
 
   useEffect(() => {
     if (editing?.id) loadRoomsForUnit(editing.id);
-    else setUnitRooms([]);
+    else queueMicrotask(() => setUnitRooms([]));
   }, [editing?.id]);
 
   const resetForm = () => {

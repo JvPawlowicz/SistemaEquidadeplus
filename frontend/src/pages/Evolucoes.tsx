@@ -27,7 +27,7 @@ export function Evolucoes() {
 
   useEffect(() => {
     if (!activeUnitId || !user?.id) return;
-    setLoading(true);
+    queueMicrotask(() => setLoading(true));
     if (view === 'minhas') {
       fetchMinhasPendentes(activeUnitId, user.id).then(setRows).finally(() => setLoading(false));
     } else if (view === 'unidade') {

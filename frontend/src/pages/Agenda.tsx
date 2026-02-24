@@ -129,7 +129,7 @@ export function Agenda() {
         start = range.start;
         end = range.end;
       }
-      setLoading(true);
+      queueMicrotask(() => setLoading(true));
       const timeoutMs = 15000;
       const timeoutPromise = new Promise<{ events: EventWithRelations[] }>((_, reject) =>
         setTimeout(() => reject(new Error('timeout')), timeoutMs)

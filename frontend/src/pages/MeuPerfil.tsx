@@ -48,6 +48,7 @@ export function MeuPerfil() {
       setLoading(false);
     });
     fetchSpecialties().then(({ list }) => setSpecialtiesList(list));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id suficiente para evitar loop
   }, [user?.id]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

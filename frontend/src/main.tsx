@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- entry point; EnvGuard é interno */
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'

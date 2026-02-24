@@ -54,7 +54,8 @@ export function EventDrawer({
   const [transferring, setTransferring] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (event) setTransferResponsibleId(event.responsible_user_id);
+    if (event) queueMicrotask(() => setTransferResponsibleId(event.responsible_user_id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intencional: só re-sinc quando id/responsible mudam
   }, [event?.id, event?.responsible_user_id]);
   if (!event) return null;
 

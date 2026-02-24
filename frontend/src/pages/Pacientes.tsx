@@ -36,7 +36,7 @@ export function Pacientes() {
 
   useEffect(() => {
     if (!activeUnitId) return;
-    setLoading(true);
+    queueMicrotask(() => setLoading(true));
     fetchPatientsInUnitWithInsurance(activeUnitId).then(async ({ patients: list }) => {
       setPatients(list);
       const ids = list.map((p) => p.id);

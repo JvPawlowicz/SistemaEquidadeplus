@@ -78,7 +78,7 @@ export function Relatorios() {
 
   useEffect(() => {
     if (!activeUnitId || tab !== 'presenca') return;
-    setPresencaLoading(true);
+    queueMicrotask(() => setPresencaLoading(true));
     const start = new Date(presencaStart + 'T00:00:00');
     const end = new Date(presencaEnd + 'T23:59:59');
     fetchEvents(
@@ -98,7 +98,7 @@ export function Relatorios() {
 
   useEffect(() => {
     if (!activeUnitId || tab !== 'pendencias') return;
-    setPendenciasLoading(true);
+    queueMicrotask(() => setPendenciasLoading(true));
     if (seesUnitAgenda) {
       fetchPendentesUnidade(activeUnitId).then((rows) => {
         setPendenciasRows(rows);
@@ -114,7 +114,7 @@ export function Relatorios() {
 
   useEffect(() => {
     if (!activeUnitId || tab !== 'chamados') return;
-    setChamadosLoading(true);
+    queueMicrotask(() => setChamadosLoading(true));
     fetchTicketCategories().then(({ categories }) =>
       setChamadosCategories(categories.map((c) => ({ id: c.id, name: c.name })))
     );
@@ -129,7 +129,7 @@ export function Relatorios() {
 
   useEffect(() => {
     if (!activeUnitId || tab !== 'aba') return;
-    setAbaLoading(true);
+    queueMicrotask(() => setAbaLoading(true));
     fetchPatientsInUnitWithInsurance(activeUnitId).then(({ patients }) => {
       const limit = 25;
       const slice = patients.slice(0, limit);
@@ -163,7 +163,7 @@ export function Relatorios() {
 
   useEffect(() => {
     if (!activeUnitId || (tab !== 'documentos' && tab !== 'pendencias')) return;
-    setDocExpiringLoading(true);
+    queueMicrotask(() => setDocExpiringLoading(true));
     fetchExpiringAttachmentsByUnit(activeUnitId).then(({ attachments }) => {
       setDocExpiring(attachments.map((a) => ({
         id: a.id,

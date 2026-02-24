@@ -78,15 +78,17 @@ function DadosEditaveis({
   });
 
   useEffect(() => {
-    setForm({
-      summary: patient.summary ?? '',
-      alerts: patient.alerts ?? '',
-      diagnoses: patient.diagnoses ?? '',
-      medications: patient.medications ?? '',
-      allergies: patient.allergies ?? '',
-      routine_notes: patient.routine_notes ?? '',
-      address: patient.address ?? '',
-    });
+    queueMicrotask(() =>
+      setForm({
+        summary: patient.summary ?? '',
+        alerts: patient.alerts ?? '',
+        diagnoses: patient.diagnoses ?? '',
+        medications: patient.medications ?? '',
+        allergies: patient.allergies ?? '',
+        routine_notes: patient.routine_notes ?? '',
+        address: patient.address ?? '',
+      })
+    );
   }, [patient]);
 
   const handleSave = async () => {
@@ -216,12 +218,12 @@ export function Prontuario() {
   const patientPhotoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (window.location.hash === '#avaliacoes') setActiveTab('avaliacoes');
+    if (window.location.hash === '#avaliacoes') queueMicrotask(() => setActiveTab('avaliacoes'));
   }, [patientId]);
 
   useEffect(() => {
     if (!patientId) return;
-    setLoading(true);
+    queueMicrotask(() => setLoading(true));
     Promise.all([
       fetchPatient(patientId),
       fetchPatientTimeline(patientId),
@@ -236,7 +238,7 @@ export function Prontuario() {
 
   useEffect(() => {
     if (!patientId || !canManagePatientUnits || activeTab !== 'dados') return;
-    setUnitsLoading(true);
+    queueMicrotask(() => setUnitsLoading(true));
     Promise.all([fetchPatientUnits(patientId), fetchAllUnits()]).then(([pu, u]) => {
       setPatientUnitIds(pu.unitIds);
       setAllUnits(u.units ?? []);

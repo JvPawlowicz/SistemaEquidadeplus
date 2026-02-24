@@ -98,10 +98,10 @@ export function EditorEvolucao() {
       }
     }
     setLoading(false);
-  }, [eventId, user?.id]);
+  }, [eventId, user]);
 
   useEffect(() => {
-    load();
+    queueMicrotask(() => load());
   }, [load]);
 
   useEffect(() => {

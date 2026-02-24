@@ -38,6 +38,7 @@ export function CompletarPerfil() {
     });
     fetchJobTitles().then(({ list }) => setJobTitlesList(list));
     fetchSpecialties().then(({ list }) => setSpecialtiesList(list));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id suficiente para evitar loop
   }, [user?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {

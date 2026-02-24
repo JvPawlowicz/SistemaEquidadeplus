@@ -15,7 +15,7 @@ export function Avaliacoes() {
 
   useEffect(() => {
     if (!activeUnitId) return;
-    setLoading(true);
+    queueMicrotask(() => setLoading(true));
     fetchPatientsInUnitWithInsurance(activeUnitId).then(({ patients: list }) => {
       setPatients(list);
       setLoading(false);

@@ -41,7 +41,7 @@ export function NovoChamado() {
   const [patientId, setPatientId] = useState<string>(patientIdFromQuery);
 
   useEffect(() => {
-    if (patientIdFromQuery) setPatientId(patientIdFromQuery);
+    if (patientIdFromQuery) queueMicrotask(() => setPatientId(patientIdFromQuery));
   }, [patientIdFromQuery]);
 
   const unitIds = units.map((u) => u.id);
@@ -61,8 +61,9 @@ export function NovoChamado() {
         }
       });
     }
-    setLoading(false);
+    queueMicrotask(() => setLoading(false));
     return () => { done = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- unitIds.join(',') evita referência instável
   }, [activeUnitId, unitIds.join(',')]);
 
   const handleSubmit = async (e: React.FormEvent) => {

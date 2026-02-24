@@ -110,6 +110,7 @@ export function ActiveUnitProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/* eslint-disable-next-line react-refresh/only-export-components -- hook exportado pelo contexto */
 export function useActiveUnit(): ActiveUnitContextValue {
   const ctx = useContext(ActiveUnitContext);
   if (!ctx) throw new Error('useActiveUnit must be used within ActiveUnitProvider');

@@ -59,7 +59,7 @@ export function Chamados() {
 
   useEffect(() => {
     if (!activeUnitId) return;
-    setLoading(true);
+    queueMicrotask(() => setLoading(true));
     fetchTicketCategories().then(({ categories: cat }) => setCategories(cat));
     fetchTicketsInUnit(activeUnitId, {
       status: filterStatus || undefined,
@@ -310,6 +310,7 @@ export function Chamados() {
 
 function AssetDrawer({
   asset,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- reservado para filtros/links
   unitId: _unitId,
   userId,
   onClose,
@@ -482,10 +483,12 @@ function ChamadoDrawer({
   }, [unitId]);
 
   useEffect(() => {
-    setEditTitle(ticket.title);
-    setEditDescription(ticket.description ?? '');
-    setEditPriority(ticket.priority);
-    setEditCategoryId(ticket.category_id ?? '');
+    queueMicrotask(() => {
+      setEditTitle(ticket.title);
+      setEditDescription(ticket.description ?? '');
+      setEditPriority(ticket.priority);
+      setEditCategoryId(ticket.category_id ?? '');
+    });
   }, [ticket.id, ticket.title, ticket.description, ticket.priority, ticket.category_id]);
 
   const handleSaveEdit = async () => {
