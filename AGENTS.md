@@ -7,7 +7,7 @@ Este projeto é o **EquidadePlus**: gestão de clínicas multi-unidade (agenda, 
 - **Frontend (app web):** `cd frontend && npm install && npm run dev`  
   - Abre em **http://localhost:5173**
 - **Variáveis:** copiar `frontend/.env.example` para `frontend/.env` e preencher `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`.
-- **Supabase:** migrations em `supabase/migrations/` (00001 a 00027). Ver `README.md` e `MCP_CONTEXT.md`.
+- **Supabase:** migrations em `supabase/migrations/` (00001 a 00031). Ver `README.md` e `MCP_CONTEXT.md`.
 
 ## Estrutura principal
 
@@ -15,7 +15,7 @@ Este projeto é o **EquidadePlus**: gestão de clínicas multi-unidade (agenda, 
 |---------------|-----|
 | `frontend/` | App React (Vite + TypeScript). Páginas em `src/pages/`, libs em `src/lib/`, componentes em `src/components/`. |
 | `supabase/migrations/` | Schema e RLS do banco. Aplicar na ordem. |
-| `supabase/functions/` | Edge Functions: `invite-user`, `reset-password`. |
+| `supabase/functions/` | Edge Functions: `invite-user`, `reset-password`, `create-user`, `set-password`. |
 | `.cursor/rules/` | Regras do Cursor (ex.: equidadeplus-supabase-mcp.mdc). |
 | `MCP_CONTEXT.md` | Referência para MCP Supabase (project_id, tabelas, buckets). |
 | `blueprint.md` | Especificação funcional. |

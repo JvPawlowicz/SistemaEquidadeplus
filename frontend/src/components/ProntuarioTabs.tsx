@@ -279,6 +279,7 @@ export function ProntuarioArquivos({ patientId, attachments, userId, onRefresh }
 
 export function ProntuarioAvaliacoes({
   patientId,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- prop reservado para uso futuro (ex.: filtrar templates por unidade)
   unitId: _unitId,
   instances,
   templates,

@@ -2,25 +2,34 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { AppRole } from '../types';
 
+/** Retorna a role do usuário na unidade ativa e se é admin em alguma unidade (para Configurações). */
 export function useUserRoleInUnit(unitId: string | null, userId: string | undefined) {
   const [role, setRole] = useState<AppRole | null>(null);
+  const [isAdminInAnyUnit, setIsAdminInAnyUnit] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!unitId || !userId) {
-      setRole(null);
-      setLoading(false);
+    if (!userId) {
+      queueMicrotask(() => {
+        setRole(null);
+        setIsAdminInAnyUnit(false);
+        setLoading(false);
+      });
       return;
     }
+    queueMicrotask(() => setLoading(true));
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
+      const { data: rows } = await supabase
         .from('user_units')
-        .select('role')
-        .eq('unit_id', unitId)
-        .eq('user_id', userId)
-        .single();
-      if (!cancelled && data) setRole(data.role as AppRole);
+        .select('unit_id, role')
+        .eq('user_id', userId);
+      if (cancelled) return;
+      const list = (rows ?? []) as { unit_id: string; role: AppRole }[];
+      const adminInAny = list.some((r) => r.role === 'admin');
+      const roleInActive = unitId ? list.find((r) => r.unit_id === unitId)?.role ?? null : null;
+      setRole(roleInActive);
+      setIsAdminInAnyUnit(adminInAny);
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -31,7 +40,6 @@ export function useUserRoleInUnit(unitId: string | null, userId: string | undefi
   const seesMyAgendaOnly = role === 'profissional' || role === 'estagiario';
   const canCreateEditPatient = role === 'admin' || role === 'coordenador' || role === 'secretaria';
   const isAdmin = role === 'admin';
-  const isTi = role === 'ti';
 
   return {
     role,
@@ -41,6 +49,8 @@ export function useUserRoleInUnit(unitId: string | null, userId: string | undefi
     seesMyAgendaOnly,
     canCreateEditPatient,
     isAdmin,
-    isTi,
+    /** True se o usuário tem role admin em pelo menos uma unidade (ex.: para exibir Configurações). */
+    isAdminInAnyUnit,
+    isTi: role === 'ti',
   };
 }

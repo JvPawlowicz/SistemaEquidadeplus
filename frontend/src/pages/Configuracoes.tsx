@@ -46,7 +46,7 @@ type ConfigTab = 'unidades' | 'tipos-atendimento' | 'convenios' | 'categorias' |
 export function Configuracoes() {
   const { user } = useAuth();
   const { activeUnitId, units: myUnits, setActiveUnitId } = useActiveUnit();
-  const { isAdmin } = useUserRoleInUnit(activeUnitId, user?.id);
+  const { isAdminInAnyUnit } = useUserRoleInUnit(activeUnitId, user?.id);
   const [tab, setTab] = useState<ConfigTab>('unidades');
   const [density, setDensity] = useState<AgendaDensity>(() =>
     (localStorage.getItem(AGENDA_DENSITY_KEY) as AgendaDensity) || 'normal'
@@ -127,10 +127,10 @@ export function Configuracoes() {
         </select>
         <Link to="/configuracoes/perfil" className="config-btn-link">Meu Perfil</Link>
       </div>
-      {!isAdmin && (
+      {!isAdminInAnyUnit && (
         <p className="configuracoes-no-admin">Apenas administradores podem gerenciar unidades, salas, convênios e categorias.</p>
       )}
-      {isAdmin && (
+      {isAdminInAnyUnit && (
         <>
           <div className="configuracoes-tabs">
             {(['unidades', 'tipos-atendimento', 'convenios', 'categorias', 'tags-pacientes', 'especialidades', 'cargos', 'usuarios', 'ativos', 'templates', 'templates-avaliacao', 'templates-aba'] as ConfigTab[]).map((t) => (

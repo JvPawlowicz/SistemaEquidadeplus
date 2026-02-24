@@ -1,7 +1,8 @@
 .avaliacoes-page {
-  padding: 0;
+  padding: 24px;
   max-width: 720px;
   width: 100%;
+  margin: 0 auto;
   box-sizing: border-box;
 }
 
@@ -92,6 +93,7 @@
 /* Empty state */
 .avaliacoes-empty {
   padding: 48px 32px;
+  margin-top: 8px;
   text-align: center;
   background: var(--color-bg-subtle);
   border: 1px dashed var(--color-border);

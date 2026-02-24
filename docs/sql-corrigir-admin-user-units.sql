@@ -1,0 +1,28 @@
+-- Corrigir vínculo de um usuário como admin em uma unidade
+-- Use se o admin foi criado mas não vê CRUDs em Configurações, ou não vê "Novo paciente" / "Criar agendamento".
+-- Execute no SQL Editor do Supabase.
+--
+-- 1) Descobrir o user_id (id em auth.users) do admin pelo e-mail:
+--    SELECT id, email FROM auth.users WHERE email = 'seu-email@exemplo.com';
+--
+-- 2) Descobrir o unit_id da unidade (ex.: primeira unidade):
+--    SELECT id, name FROM public.units ORDER BY name LIMIT 5;
+--
+-- 3) Inserir ou atualizar user_units para esse usuário ser admin na unidade (substitua os UUIDs):
+
+-- INSERT INTO public.user_units (user_id, unit_id, role)
+-- VALUES (
+--   'USER_ID_AQUI'::uuid,
+--   'UNIT_ID_AQUI'::uuid,
+--   'admin'
+-- )
+-- ON CONFLICT (user_id, unit_id) DO UPDATE SET role = 'admin';
+
+-- Exemplo (descomente e edite os UUIDs):
+-- INSERT INTO public.user_units (user_id, unit_id, role)
+-- VALUES (
+--   (SELECT id FROM auth.users WHERE email = 'joao.victor@grupoequidade.com.br' LIMIT 1),
+--   (SELECT id FROM public.units ORDER BY name LIMIT 1),
+--   'admin'
+-- )
+-- ON CONFLICT (user_id, unit_id) DO UPDATE SET role = 'admin';

@@ -4,14 +4,14 @@ Este documento é a referência única para o **MCP Supabase** e para deploy (Re
 
 **Estado atual via MCP (project_id: wwcsmkmwelkgloklbmkw):**
 - **URL:** https://wwcsmkmwelkgloklbmkw.supabase.co
-- **Migrations:** 00001 → 00031 **aplicadas** (schema e storage RLS atualizados).
+- **Migrations:** 00001 → 00032 **aplicadas** (schema, storage RLS e docs_role_permissions).
 - **Buckets:** avatars, attachments, patients (todos public: true).
 - **Edge Functions:** invite-user, reset-password, create-user, set-password (ACTIVE, verify_jwt: true).
 - **Tabelas public (resumo):** profiles, units (com cep), rooms, user_units, insurances, patients, patient_units, events, notes, patient_tag_definitions, patient_tag_assignments, config_job_titles, config_specialties, evaluation_templates, evaluation_instances, aba_templates, aba_template_goals, aba_programs, aba_goals, tickets, ticket_categories, assets, attachments, note_templates, appointment_types, etc.
 
 Para atualizar: `list_migrations`, `list_edge_functions`, `execute_sql` (storage.buckets), `list_tables` e `get_project_url` com `project_id: wwcsmkmwelkgloklbmkw`.
 
-**Funcionalidades de backend / frontend:** Importar foto de perfil em Meu Perfil (bucket avatars, lib/avatars.ts). Fotos de pacientes (bucket patients). Anexos (bucket attachments). Admin cria usuário com create-user (e-mail, senha, unidade, role) e redefine senha com set-password. Role definida ao criar usuário; sem tela Completar perfil. Tags de pacientes com cores (patient_tag_definitions.color_hex) na listagem de Pacientes.
+**Funcionalidades de backend / frontend:** Importar foto de perfil em Meu Perfil (bucket avatars, lib/avatars.ts). Fotos de pacientes (bucket patients). Anexos (bucket attachments). Admin cria usuário com create-user (e-mail, senha, unidade, role) e redefine senha com set-password. Role definida ao criar usuário; sem tela Completar perfil. Tags de pacientes com cores (patient_tag_definitions.color_hex) na listagem de Pacientes. Configurações: abas CRUD visíveis se usuário é admin em qualquer unidade (hook `isAdminInAnyUnit`). Página Avaliações: layout com padding e conteúdo centralizado.
 
 ---
 
@@ -28,9 +28,9 @@ Ao usar as ferramentas do MCP Supabase (`list_tables`, `execute_sql`, `apply_mig
 
 ---
 
-## Migrations (ordem 00001 → 00031)
+## Migrations (ordem 00001 → 00032)
 
-Todas em `supabase/migrations/`. Aplicar na ordem (via `npx supabase db push` ou SQL Editor).
+Todas em `supabase/migrations/`. Aplicar na ordem (via `npx supabase db push` ou SQL Editor). A 00032 foi aplicada via MCP (apply_migration + execute_sql).
 
 | Arquivo | Descrição |
 |--------|-----------|
@@ -65,6 +65,7 @@ Todas em `supabase/migrations/`. Aplicar na ordem (via `npx supabase db push` ou
 | 00029_config_job_titles_specialties.sql | config_job_titles, config_specialties (CRUD admin; uso em Meu Perfil para especialidades) |
 | 00030_aba_template_goals.sql | aba_template_goals (metas por template ABA) |
 | 00031_units_cep.sql | units.cep (fuso horário por CEP) |
+| 00032_docs_role_permissions.sql | Tabela docs_role_permissions + comentário em app_role; RLS SELECT para authenticated. |
 
 ---
 
@@ -85,6 +86,23 @@ Todas em `supabase/migrations/`. Aplicar na ordem (via `npx supabase db push` ou
 - **evaluation_templates**, **evaluation_instances**, **aba_templates**, **aba_programs**, **aba_goals**, **aba_session_data**
 - **note_templates**, **appointment_types**, **treatment_cycles**, **treatment_goals**, **note_goals**, **patient_relatives**
 - **config_job_titles**, **config_specialties** – listas admin (especialidades no perfil; cargos eliminados em favor da role em user_units)
+- **docs_role_permissions** – tabela de documentação (opcional): criada por `docs/sql-roles-acesso-documentacao.sql`; descreve por role/recurso o que pode SELECT/INSERT/UPDATE/DELETE. RLS: SELECT para authenticated.
+
+---
+
+## Scripts SQL em docs/ (executar no SQL Editor quando necessário)
+
+| Arquivo | Uso |
+|--------|-----|
+| **sql-criar-usuario-admin.sql** | Criar primeiro usuário admin (auth.users + profiles + user_units com role admin). Exige ao menos uma unidade em `units`. |
+| **sql-corrigir-admin-user-units.sql** | Corrigir vínculo admin: inserir/atualizar `user_units` (user_id, unit_id, role = 'admin') se o admin não vê CRUDs em Configurações ou botões Novo paciente / Criar agendamento. |
+| **sql-roles-acesso-documentacao.sql** | Documentação de roles: cria `docs_role_permissions` e preenche matriz admin, coordenador, secretaria, profissional, estagiario, ti × recursos (profiles, units, events, patients, etc.). Não altera RLS. |
+
+---
+
+## Roles (app_role em user_units)
+
+Papéis por unidade: **admin**, **coordenador**, **secretaria**, **profissional**, **estagiario**, **ti**. Detalhe do que cada um acessa/altera: tabela `docs_role_permissions` (após rodar `docs/sql-roles-acesso-documentacao.sql`) ou blueprint. No frontend: Configurações exibem abas CRUD se o usuário é admin em **qualquer** unidade (`isAdminInAnyUnit`); Pacientes/Agenda usam a role na unidade ativa.
 
 ---
 
@@ -144,3 +162,4 @@ npx supabase gen types typescript --project-id <PROJECT_REF> > frontend/src/type
 - **PRODUCAO.md** – Checklist completo de produção (migrations, buckets, Edge Functions, SMTP, frontend).
 - **supabase/APLICAR_MIGRATIONS.md** – Como aplicar migrations.
 - **supabase/DEPLOY_FUNCOES.md** – Deploy das Edge Functions.
+- **docs/sql-*.sql** – Scripts opcionais: criar admin, corrigir user_units admin, documentação de roles (ver tabela acima).
