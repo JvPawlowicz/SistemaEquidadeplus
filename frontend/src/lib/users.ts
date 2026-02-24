@@ -1,6 +1,33 @@
 import { supabase } from './supabase';
 import type { AppRole } from '../types';
 
+/** Cria usuário com e-mail e senha (admin). Requer Edge Function create-user. */
+export async function createUserWithPassword(params: {
+  email: string;
+  password: string;
+  full_name?: string;
+  unit_id?: string;
+  role?: AppRole;
+}): Promise<{ message?: string; user_id?: string; error?: string }> {
+  const { data, error } = await supabase.functions.invoke('create-user', { body: params });
+  if (error) return { error: error.message };
+  const err = (data as { error?: string })?.error;
+  if (err) return { error: err };
+  return {
+    message: (data as { message?: string })?.message,
+    user_id: (data as { user_id?: string })?.user_id,
+  };
+}
+
+/** Admin redefine a senha de um usuário. Requer Edge Function set-password. */
+export async function adminSetPassword(userId: string, newPassword: string): Promise<{ message?: string; error?: string }> {
+  const { data, error } = await supabase.functions.invoke('set-password', { body: { user_id: userId, new_password: newPassword } });
+  if (error) return { error: error.message };
+  const err = (data as { error?: string })?.error;
+  if (err) return { error: err };
+  return { message: (data as { message?: string })?.message };
+}
+
 /** Chama a Edge Function para enviar convite por e-mail. Requer deploy da função invite-user. */
 export async function inviteUserByEmail(email: string): Promise<{ message?: string; link?: string; error?: string }> {
   const { data, error } = await supabase.functions.invoke('invite-user', { body: { email } });

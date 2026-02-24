@@ -1,6 +1,9 @@
 .novo-chamado-page {
   padding: 24px;
+  width: 100%;
   max-width: 640px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .novo-chamado-header {

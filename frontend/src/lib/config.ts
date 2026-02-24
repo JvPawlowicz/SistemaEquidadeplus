@@ -57,7 +57,7 @@ export async function fetchAllUnits() {
 export async function createUnit(
   name: string,
   timezone = 'America/Sao_Paulo',
-  extra?: Partial<Pick<Unit, 'address' | 'cnpj' | 'phone' | 'email' | 'is_active'>>
+  extra?: Partial<Pick<Unit, 'address' | 'cep' | 'cnpj' | 'phone' | 'email' | 'is_active'>>
 ) {
   const { data, error } = await supabase
     .from('units')
@@ -69,7 +69,7 @@ export async function createUnit(
 
 export async function updateUnit(
   id: string,
-  data: Partial<Pick<Unit, 'name' | 'timezone' | 'address' | 'cnpj' | 'phone' | 'email' | 'is_active'>>
+  data: Partial<Pick<Unit, 'name' | 'timezone' | 'address' | 'cep' | 'cnpj' | 'phone' | 'email' | 'is_active'>>
 ) {
   const { data: updated, error } = await supabase
     .from('units')

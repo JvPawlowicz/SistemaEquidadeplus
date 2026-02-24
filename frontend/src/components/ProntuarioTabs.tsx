@@ -7,6 +7,7 @@ import { createCycle, updateCycle, deleteCycle, createGoal, updateGoal, deleteGo
 import { createInstance } from '../lib/avaliacoes';
 import { uploadAttachment, deleteAttachment, getAttachmentUrl } from '../lib/attachments';
 import { createProgram, createGoal as createAbaGoal, deleteProgram, deleteGoal as deleteAbaGoal } from '../lib/aba';
+import { fetchAbaTemplateGoals } from '../lib/abaTemplates';
 import { fetchSessionDataByGoal } from '../lib/abaSessionData';
 import { fetchAbaTemplatesByUnit, type AbaTemplate } from '../lib/abaTemplates';
 import { createRelative, updateRelative, deleteRelative, type CreateRelativePayload } from '../lib/patients';
@@ -642,7 +643,13 @@ export function ProntuarioAba({
                 const t = abaTemplates.find((x) => x.id === id);
                 if (!t) return;
                 setCreatingFromTemplate(true);
-                const { error } = await createProgram(patientId, { name: t.name, description: t.description ?? undefined });
+                const { program, error } = await createProgram(patientId, { name: t.name, description: t.description ?? undefined });
+                if (!error && program) {
+                  const { goals } = await fetchAbaTemplateGoals(t.id);
+                  for (let i = 0; i < goals.length; i++) {
+                    await createAbaGoal(program.id, { name: goals[i].name, target_type: goals[i].target_type, sort_order: i });
+                  }
+                }
                 setCreatingFromTemplate(false);
                 e.target.value = '';
                 if (!error) onRefresh();

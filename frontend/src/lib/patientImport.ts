@@ -101,7 +101,9 @@ function excelSerialToDate(serial: number): Date | null {
 
 /**
  * Lê um arquivo XLS/XLSX e retorna as linhas mapeadas para o formato do paciente.
- * Valida nome e data; retorna erros por linha.
+ * Aceita cabeçalhos como "Nome", "Nome do Paciente", "Data Nascimento", etc.
+ * Datas podem ser número (Excel) ou string AAAA-MM-DD / DD/MM/AAAA.
+ * Todos os pacientes são cadastrados na unidade ativa (depois podem ser distribuídos).
  */
 export function parseImportFile(file: File): Promise<{ rows: ParsedRow[]; errors: string[] }> {
   return new Promise((resolve, reject) => {
@@ -113,17 +115,18 @@ export function parseImportFile(file: File): Promise<{ rows: ParsedRow[]; errors
           resolve({ rows: [], errors: ['Arquivo inválido ou vazio.'] });
           return;
         }
-        const wb = XLSX.read(data, { type: 'array' });
+        const wb = XLSX.read(data, { type: 'array', cellDates: false, raw: false });
         const firstSheet = wb.SheetNames[0];
         const ws = wb.Sheets[firstSheet];
-        const aoa = XLSX.utils.sheet_to_json<string[]>(ws, { header: 1, defval: '' });
+        const aoa = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: '', raw: false });
         if (!aoa.length) {
           resolve({ rows: [], errors: ['Planilha vazia.'] });
           return;
         }
-        const headerRow = aoa[0].map((c) => norm(c));
-        const nameIdx = headerRow.findIndex((h) => /nome/i.test(h));
-        const birthIdx = headerRow.findIndex((h) => /data|nascimento/i.test(h));
+        const headerRow = (aoa[0] as unknown[]).map((c) => norm(c));
+        const nameIdx = headerRow.findIndex((h) => /nome\s*(do\s*paciente)?/i.test(h));
+        const birthIdxFound = headerRow.findIndex((h) => /data\s*nascimento|nascimento|nasc\./i.test(h));
+        const birthIdx = birthIdxFound >= 0 ? birthIdxFound : (headerRow.length > 1 ? 1 : -1);
         const addrIdx = headerRow.findIndex((h) => /endere[cç]o/i.test(h));
         const docIdx = headerRow.findIndex((h) => /documento/i.test(h));
         const insIdx = headerRow.findIndex((h) => /conv[eê]nio/i.test(h));
@@ -135,22 +138,28 @@ export function parseImportFile(file: File): Promise<{ rows: ParsedRow[]; errors
         const obsIdx = headerRow.findIndex((h) => /observa|c[cç]o|rotina/i.test(h));
         const tagIdx = headerRow.findIndex((h) => /tag/i.test(h));
 
-        const get = (row: string[], i: number) => (i >= 0 && row[i] !== undefined ? norm(row[i]) : '');
+        const get = (row: unknown[], i: number): string => {
+          if (i < 0 || !row || row[i] === undefined) return '';
+          return norm(row[i]);
+        };
+
+        const getRaw = (row: unknown[], i: number): unknown => (i >= 0 && row && row[i] !== undefined ? row[i] : '');
 
         const rows: ParsedRow[] = [];
         const errors: string[] = [];
 
         for (let i = 1; i < aoa.length; i++) {
-          const row = aoa[i];
-          if (!Array.isArray(row)) continue;
+          const rawRow = aoa[i];
+          const row = Array.isArray(rawRow) ? rawRow : (rawRow && typeof rawRow === 'object' ? headerRow.map((_, idx) => (rawRow as Record<string, unknown>)[headerRow[idx]] ?? '') : []);
           const name = get(row, nameIdx);
-          const birth = birthIdx >= 0 ? normDate(row[birthIdx]) : '';
+          const birthRaw = getRaw(row, birthIdx);
+          const birth = birthIdx >= 0 ? normDate(birthRaw) : '';
           const rowErrors: string[] = [];
-          if (!name) rowErrors.push('Nome obrigatório');
-          if (!birth) rowErrors.push('Data de nascimento obrigatória (use YYYY-MM-DD)');
+          if (!name || !name.trim()) rowErrors.push('Nome obrigatório');
+          if (!birth) rowErrors.push('Data de nascimento obrigatória');
           rows.push({
-            full_name: name,
-            birth_date: birth,
+            full_name: name.trim(),
+            birth_date: birth || '',
             address: addrIdx >= 0 ? get(row, addrIdx) || null : null,
             document: docIdx >= 0 ? get(row, docIdx) || null : null,
             insurance_name: insIdx >= 0 ? get(row, insIdx) || null : null,
@@ -160,7 +169,7 @@ export function parseImportFile(file: File): Promise<{ rows: ParsedRow[]; errors
             medications: medIdx >= 0 ? get(row, medIdx) || null : null,
             allergies: allIdx >= 0 ? get(row, allIdx) || null : null,
             routine_notes: obsIdx >= 0 ? get(row, obsIdx) || null : null,
-            tags: tagIdx >= 0 ? get(row, tagIdx).split(',').map((t) => t.trim()).filter(Boolean) || null : null,
+            tags: tagIdx >= 0 ? (get(row, tagIdx).split(',').map((t) => t.trim()).filter(Boolean).length ? get(row, tagIdx).split(',').map((t) => t.trim()).filter(Boolean) : null) : null,
             rowIndex: i + 1,
             errors: rowErrors,
           });

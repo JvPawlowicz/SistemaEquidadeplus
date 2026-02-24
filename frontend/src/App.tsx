@@ -1,11 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { InactivityProvider } from './components/InactivityModal';
 import { ActiveUnitProvider, useActiveUnit } from './contexts/ActiveUnitContext';
 import { useUserRoleInUnit } from './hooks/useUserRoleInUnit';
 import { Layout } from './components/Layout';
-import { fetchProfile } from './lib/config';
 import { Login } from './pages/Login';
 import { Agenda } from './pages/Agenda';
 import { Pacientes } from './pages/Pacientes';
@@ -19,7 +17,6 @@ import { Configuracoes } from './pages/Configuracoes';
 import { Chamados } from './pages/Chamados';
 import { NovoChamado } from './pages/NovoChamado';
 import { MeuPerfil } from './pages/MeuPerfil';
-import { CompletarPerfil } from './pages/CompletarPerfil';
 import { Outlet } from 'react-router-dom';
 
 function HomeRedirect() {
@@ -29,26 +26,8 @@ function HomeRedirect() {
   return <Navigate to={isTi ? '/chamados' : '/agenda'} replace />;
 }
 
-/** Redireciona para Completar perfil quando o perfil não tem nome (novo usuário). */
+/** Usuário logado pode acessar o app; perfil é editado em Meu Perfil quando quiser. */
 function RequireProfileComplete({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
-  const [shouldRedirect, setShouldRedirect] = useState(false);
-  const [checked, setChecked] = useState(false);
-
-  useEffect(() => {
-    if (!user?.id) {
-      setChecked(true);
-      return;
-    }
-    fetchProfile(user.id)
-      .then(({ profile }) => {
-        if (profile && !profile.full_name?.trim()) setShouldRedirect(true);
-      })
-      .finally(() => setChecked(true));
-  }, [user?.id]);
-
-  if (!checked) return <>{children}</>;
-  if (shouldRedirect) return <Navigate to="/completar-perfil" replace />;
   return <>{children}</>;
 }
 
@@ -83,7 +62,6 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route path="completar-perfil" element={<CompletarPerfil />} />
         <Route
           path="/*"
           element={

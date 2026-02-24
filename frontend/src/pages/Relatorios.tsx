@@ -359,6 +359,14 @@ export function Relatorios() {
             <button type="button" className="relatorios-btn-export" onClick={exportPendencias} disabled={pendenciasRows.length === 0}>
               Exportar CSV
             </button>
+            <button
+              type="button"
+              className="relatorios-btn-export"
+              onClick={() => window.print()}
+              title="Imprimir / salvar como PDF"
+            >
+              Exportar PDF (imprimir)
+            </button>
           </div>
           {pendenciasLoading && <p className="relatorios-loading"><span className="loading-spinner" aria-hidden /> Carregando…</p>}
           <div className="relatorios-table-wrap">
@@ -369,11 +377,12 @@ export function Relatorios() {
                   <th>Paciente</th>
                   <th>Responsável</th>
                   <th>Status evento</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {pendenciasRows.length === 0 && !pendenciasLoading && (
-                  <tr><td colSpan={4} className="relatorios-empty">Nenhuma pendência.</td></tr>
+                  <tr><td colSpan={5} className="relatorios-empty">Nenhuma pendência.</td></tr>
                 )}
                 {pendenciasRows.map((r) => (
                   <tr key={r.event_id}>
@@ -381,6 +390,9 @@ export function Relatorios() {
                     <td>{r.patient_name ?? '—'}</td>
                     <td>{r.responsible_name ?? '—'}</td>
                     <td>{r.status}</td>
+                    <td>
+                      <Link to={`/evolucoes/editor/${r.event_id}`} className="relatorios-link-evolucao">Abrir evolução</Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -74,3 +74,44 @@ export function formatCep(cep: string): string {
   if (d.length <= 5) return d;
   return `${d.slice(0, 5)}-${d.slice(5)}`;
 }
+
+/** Fusos horários IANA por UF (Brasil). Usado para preencher timezone da unidade a partir do CEP. */
+const UF_TO_TIMEZONE: Record<string, string> = {
+  AC: 'America/Rio_Branco',   // Acre (-5)
+  AM: 'America/Manaus',       // Amazonas (-4)
+  RR: 'America/Manaus',       // Roraima
+  RO: 'America/Porto_Velho',  // Rondônia (-4)
+  MT: 'America/Cuiaba',       // Mato Grosso (-4)
+  MS: 'America/Cuiaba',       // Mato Grosso do Sul (-4)
+  DF: 'America/Sao_Paulo',    // Distrito Federal (-3)
+  GO: 'America/Sao_Paulo',
+  TO: 'America/Araguaina',    // Tocantins (-3)
+  PA: 'America/Belem',        // Pará (-3)
+  AP: 'America/Belem',       // Amapá
+  MA: 'America/Fortaleza',    // Maranhão (-3)
+  PI: 'America/Fortaleza',
+  CE: 'America/Fortaleza',
+  RN: 'America/Fortaleza',
+  PB: 'America/Fortaleza',
+  PE: 'America/Sao_Paulo',    // Pernambuco (-3) — Noronha seria America/Noronha
+  AL: 'America/Sao_Paulo',
+  SE: 'America/Sao_Paulo',
+  BA: 'America/Sao_Paulo',
+  ES: 'America/Sao_Paulo',
+  MG: 'America/Sao_Paulo',
+  RJ: 'America/Sao_Paulo',
+  SP: 'America/Sao_Paulo',
+  PR: 'America/Sao_Paulo',
+  SC: 'America/Sao_Paulo',
+  RS: 'America/Sao_Paulo',
+};
+
+/**
+ * Retorna o fuso horário IANA para o estado (UF) brasileiro.
+ * Fallback: America/Sao_Paulo.
+ */
+export function getTimezoneFromState(uf: string): string {
+  if (!uf || typeof uf !== 'string') return 'America/Sao_Paulo';
+  const normalized = uf.trim().toUpperCase().slice(0, 2);
+  return UF_TO_TIMEZONE[normalized] ?? 'America/Sao_Paulo';
+}

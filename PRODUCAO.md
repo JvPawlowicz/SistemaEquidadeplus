@@ -19,7 +19,7 @@ npx supabase db push
 ### Opção B – Dashboard
 
 1. No [Supabase Dashboard](https://supabase.com/dashboard) → seu projeto → **SQL Editor**.
-2. Execute, **na ordem**, o conteúdo de cada arquivo em `supabase/migrations/` (00001 até 00027).
+2. Execute, **na ordem**, o conteúdo de cada arquivo em `supabase/migrations/` (00001 até **00031**).
 3. Se aparecer “already exists” ou “duplicate”, ignore ou pule apenas essa parte.
 
 Migrations importantes para o sistema atual:
@@ -29,6 +29,10 @@ Migrations importantes para o sistema atual:
 - **00025** – Tags de paciente (tabelas + cores), unidades (endereço, CNPJ), eventos (cor)
 - **00026** – Perfil (phone, job_title, bio)
 - **00027** – Sincronização do schema (evita erros de schema cache)
+- **00028** – Ajuste RLS dos buckets (avatars/attachments) para upload sem erro de RLS
+- **00029** – config_job_titles, config_specialties (admin; Meu Perfil)
+- **00030** – aba_template_goals (metas por template ABA)
+- **00031** – units.cep (fuso horário por CEP)
 - **00011, 00012, 00014** – Políticas RLS dos buckets (attachments, avatars, patients)
 
 ---

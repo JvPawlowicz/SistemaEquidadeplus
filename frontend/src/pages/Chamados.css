@@ -1,5 +1,8 @@
 .chamados-page {
   padding: 24px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .chamados-toolbar {
@@ -90,6 +93,8 @@
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  min-height: 200px;
 }
 
 .chamados-table {
@@ -151,20 +156,10 @@
 }
 
 .chamados-empty {
-  padding: 40px 24px;
+  padding: 48px 24px;
   text-align: center;
   color: var(--color-text-muted);
   font-size: 0.95rem;
-}
-
-.chamados-empty::before {
-  content: '';
-  display: block;
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 12px;
-  background: var(--color-border-light);
-  border-radius: 50%;
 }
 
 /* Drawer */

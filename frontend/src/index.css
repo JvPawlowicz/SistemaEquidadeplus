@@ -12,6 +12,7 @@
   --color-primary: #4361ee;
   --color-primary-hover: #3651d4;
   --color-primary-light: rgba(67, 97, 238, 0.08);
+  --color-primary-focus: rgba(67, 97, 238, 0.25);
   --color-accent: #0d9488;
   --color-accent-hover: #0f766e;
   --color-accent-light: rgba(13, 148, 136, 0.12);
@@ -25,12 +26,20 @@
   --color-text-muted: #666;
   --color-success: #0f9d58;
   --color-success-hover: #0d8a4c;
+  --color-success-light: rgba(15, 157, 88, 0.12);
   --color-warning: #f9a825;
+  --color-warning-light: rgba(249, 168, 37, 0.12);
   --color-danger: #c5221f;
   --color-danger-hover: #a91c1a;
+  --color-danger-light: rgba(197, 34, 31, 0.08);
   --color-nav: #1a1a2e;
   --color-nav-panel: #252538;
   --color-nav-accent: rgba(13, 148, 136, 0.25);
+
+  /* Interatividade */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --focus-ring: 0 0 0 3px var(--color-primary-focus);
 
   /* Espaçamento e raios */
   --radius-sm: 6px;
@@ -39,8 +48,6 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.2s ease;
 }
 
 * {
@@ -57,6 +64,11 @@ body {
 
 #root {
   min-height: 100vh;
+}
+
+/* Base para todas as páginas: alinhamento e box-sizing */
+[class$="-page"] {
+  box-sizing: border-box;
 }
 
 /* Spinner de carregamento reutilizável */

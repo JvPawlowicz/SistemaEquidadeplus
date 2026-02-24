@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList, Search, UserPlus, ChevronRight } from 'lucide-react';
 import { useActiveUnit } from '../contexts/ActiveUnitContext';
 import { fetchPatientsInUnitWithInsurance } from '../lib/patients';
 import type { PatientWithInsurance } from '../lib/patients';
@@ -32,38 +32,80 @@ export function Avaliacoes() {
 
   return (
     <div className="avaliacoes-page">
-      <h1 className="avaliacoes-title">Avaliações</h1>
-      <p className="avaliacoes-desc">
-        Selecione um paciente para abrir ou iniciar avaliações no prontuário.
-      </p>
-      <div className="avaliacoes-toolbar">
-        <input
-          type="search"
-          placeholder="Buscar paciente..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="avaliacoes-search"
-        />
-      </div>
-      {loading && <p className="avaliacoes-loading">Carregando…</p>}
-      {!loading && filtered.length === 0 && (
-        <div className="avaliacoes-empty">
-          <ClipboardList size={48} aria-hidden />
-          <p>{search.trim() ? 'Nenhum paciente encontrado.' : 'Nenhum paciente nesta unidade.'}</p>
-          {!search.trim() && <Link to="/pacientes" className="avaliacoes-link">Ir para Pacientes</Link>}
+      <header className="avaliacoes-header">
+        <div className="avaliacoes-header-text">
+          <h1 className="avaliacoes-title">Avaliações</h1>
+          <p className="avaliacoes-desc">
+            Selecione um paciente para abrir ou iniciar avaliações no prontuário (anamnese, consentimentos, avaliações internas).
+          </p>
+        </div>
+        <div className="avaliacoes-search-wrap">
+          <Search className="avaliacoes-search-icon" size={20} aria-hidden />
+          <input
+            type="search"
+            placeholder="Buscar paciente..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="avaliacoes-search"
+            aria-label="Buscar paciente"
+          />
+        </div>
+      </header>
+
+      {loading && (
+        <div className="avaliacoes-loading-wrap">
+          <span className="loading-spinner" aria-hidden />
+          <p className="avaliacoes-loading">Carregando pacientes…</p>
         </div>
       )}
+
+      {!loading && filtered.length === 0 && (
+        <div className="avaliacoes-empty">
+          <div className="avaliacoes-empty-icon-wrap">
+            <ClipboardList className="avaliacoes-empty-icon" size={56} aria-hidden />
+          </div>
+          <h2 className="avaliacoes-empty-title">
+            {search.trim() ? 'Nenhum paciente encontrado' : 'Nenhum paciente nesta unidade'}
+          </h2>
+          <p className="avaliacoes-empty-desc">
+            {search.trim()
+              ? 'Tente outro termo de busca.'
+              : 'Cadastre pacientes na unidade para criar e preencher avaliações no prontuário.'}
+          </p>
+          {!search.trim() && (
+            <Link to="/pacientes" className="avaliacoes-empty-cta">
+              <UserPlus size={18} aria-hidden />
+              <span>Ir para Pacientes</span>
+            </Link>
+          )}
+        </div>
+      )}
+
       {!loading && filtered.length > 0 && (
-        <ul className="avaliacoes-list">
-          {filtered.map((p) => (
-            <li key={p.id} className="avaliacoes-list-item">
-              <span className="avaliacoes-list-name">{p.full_name}</span>
-              <button type="button" className="avaliacoes-btn-open" onClick={() => handleOpenAvaliacoes(p.id)}>
-                Abrir avaliações
-              </button>
-            </li>
-          ))}
-        </ul>
+        <section className="avaliacoes-list-section" aria-label="Pacientes para avaliações">
+          <p className="avaliacoes-list-count">
+            {filtered.length} {filtered.length === 1 ? 'paciente' : 'pacientes'}
+          </p>
+          <ul className="avaliacoes-list">
+            {filtered.map((p) => (
+              <li key={p.id} className="avaliacoes-list-item">
+                <div className="avaliacoes-list-item-main">
+                  <span className="avaliacoes-list-name">{p.full_name}</span>
+                  <span className="avaliacoes-list-hint">Abrir prontuário → Avaliações</span>
+                </div>
+                <button
+                  type="button"
+                  className="avaliacoes-btn-open"
+                  onClick={() => handleOpenAvaliacoes(p.id)}
+                  aria-label={`Abrir avaliações de ${p.full_name}`}
+                >
+                  <span>Abrir avaliações</span>
+                  <ChevronRight size={18} aria-hidden />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   );

@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchProfile, updateProfile } from '../lib/config';
+import { fetchSpecialties } from '../lib/specialties';
 import { uploadAvatar, removeAvatar } from '../lib/avatars';
+import { supabase } from '../lib/supabase';
 import './MeuPerfil.css';
 
 export function MeuPerfil() {
@@ -12,18 +14,23 @@ export function MeuPerfil() {
   const [fullName, setFullName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [phone, setPhone] = useState('');
-  const [jobTitle, setJobTitle] = useState('');
   const [bio, setBio] = useState('');
   const [councilType, setCouncilType] = useState('');
   const [councilNumber, setCouncilNumber] = useState('');
   const [councilUf, setCouncilUf] = useState('');
-  const [specialtiesText, setSpecialtiesText] = useState('');
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
+  const [specialtiesList, setSpecialtiesList] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [avatarUrlInput, setAvatarUrlInput] = useState('');
+  const [passwordCurrent, setPasswordCurrent] = useState('');
+  const [passwordNew, setPasswordNew] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [passwordChanging, setPasswordChanging] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -32,15 +39,15 @@ export function MeuPerfil() {
         setFullName(profile.full_name ?? '');
         setAvatarUrl(profile.avatar_url ?? '');
         setPhone(profile.phone ?? '');
-        setJobTitle(profile.job_title ?? '');
         setBio(profile.bio ?? '');
         setCouncilType(profile.council_type ?? '');
         setCouncilNumber(profile.council_number ?? '');
         setCouncilUf(profile.council_uf ?? '');
-        setSpecialtiesText(Array.isArray(profile.specialties) ? profile.specialties.join(', ') : '');
+        setSelectedSpecialties(Array.isArray(profile.specialties) ? profile.specialties : []);
       }
       setLoading(false);
     });
+    fetchSpecialties().then(({ list }) => setSpecialtiesList(list));
   }, [user?.id]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,12 +92,11 @@ export function MeuPerfil() {
       full_name: fullName.trim() || null,
       avatar_url: avatarUrl.trim() || null,
       phone: phone.trim() || null,
-      job_title: jobTitle.trim() || null,
       bio: bio.trim() || null,
       council_type: councilType.trim() || null,
       council_number: councilNumber.trim() || null,
       council_uf: councilUf.trim() || null,
-      specialties: specialtiesText.trim() ? specialtiesText.split(',').map((s) => s.trim()).filter(Boolean) : null,
+      specialties: selectedSpecialties.length ? selectedSpecialties : null,
     });
     setSaving(false);
     if (error) {
@@ -134,16 +140,6 @@ export function MeuPerfil() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="(00) 00000-0000"
-            className="meu-perfil-input"
-          />
-        </label>
-        <label className="meu-perfil-label">
-          Cargo / função no time
-          <input
-            type="text"
-            value={jobTitle}
-            onChange={(e) => setJobTitle(e.target.value)}
-            placeholder="Ex.: Psicólogo, Terapeuta ABA"
             className="meu-perfil-input"
           />
         </label>
@@ -202,7 +198,7 @@ export function MeuPerfil() {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
               >
-                {uploading ? 'Enviando…' : 'Enviar foto (Supabase)'}
+                {uploading ? 'Enviando…' : 'Enviar foto'}
               </button>
               {!showUrlInput ? (
                 <button
@@ -259,13 +255,88 @@ export function MeuPerfil() {
               maxLength={2}
             />
           </div>
-          <input
-            type="text"
-            value={specialtiesText}
-            onChange={(e) => setSpecialtiesText(e.target.value)}
-            placeholder="Especialidades (separadas por vírgula)"
-            className="meu-perfil-input"
-          />
+          <div className="meu-perfil-specialties">
+            <span className="meu-perfil-label">Especialidades</span>
+            <div className="meu-perfil-specialties-chips">
+              {specialtiesList.map((s) => (
+                <label key={s.id} className="meu-perfil-specialty-chip">
+                  <input
+                    type="checkbox"
+                    checked={selectedSpecialties.includes(s.name)}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedSpecialties((prev) => [...prev, s.name]);
+                      else setSelectedSpecialties((prev) => prev.filter((n) => n !== s.name));
+                    }}
+                  />
+                  <span>{s.name}</span>
+                </label>
+              ))}
+            </div>
+            {specialtiesList.length === 0 && <p className="meu-perfil-muted">Nenhuma especialidade cadastrada. O admin pode cadastrar em Configurações → Especialidades.</p>}
+          </div>
+        </div>
+
+        <div className="meu-perfil-section-divider" />
+        <h3 className="meu-perfil-section-title">Alterar senha</h3>
+        <div className="meu-perfil-password-section">
+          {passwordMessage && (
+            <p className={`meu-perfil-message ${passwordMessage.startsWith('Erro') ? 'meu-perfil-message-error' : ''}`}>{passwordMessage}</p>
+          )}
+          <label className="meu-perfil-label">
+            Senha atual
+            <input
+              type="password"
+              value={passwordCurrent}
+              onChange={(e) => setPasswordCurrent(e.target.value)}
+              placeholder="••••••••"
+              className="meu-perfil-input"
+              autoComplete="current-password"
+            />
+          </label>
+          <label className="meu-perfil-label">
+            Nova senha
+            <input
+              type="password"
+              value={passwordNew}
+              onChange={(e) => setPasswordNew(e.target.value)}
+              placeholder="••••••••"
+              className="meu-perfil-input"
+              autoComplete="new-password"
+            />
+          </label>
+          <label className="meu-perfil-label">
+            Confirmar nova senha
+            <input
+              type="password"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              placeholder="••••••••"
+              className="meu-perfil-input"
+              autoComplete="new-password"
+            />
+          </label>
+          <button
+            type="button"
+            className="meu-perfil-btn-password"
+            disabled={passwordChanging || !passwordCurrent || !passwordNew || passwordNew !== passwordConfirm}
+            onClick={async () => {
+              if (!passwordCurrent || !passwordNew || passwordNew !== passwordConfirm) return;
+              setPasswordChanging(true);
+              setPasswordMessage(null);
+              const { error: err } = await supabase.auth.updateUser({ password: passwordNew });
+              setPasswordChanging(false);
+              if (err) {
+                setPasswordMessage(err.message ?? 'Erro ao alterar senha.');
+                return;
+              }
+              setPasswordMessage('Senha alterada com sucesso.');
+              setPasswordCurrent('');
+              setPasswordNew('');
+              setPasswordConfirm('');
+            }}
+          >
+            {passwordChanging ? 'Alterando…' : 'Alterar senha'}
+          </button>
         </div>
 
         <div className="meu-perfil-actions">

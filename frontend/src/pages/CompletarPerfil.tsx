@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchProfile, updateProfile } from '../lib/config';
+import { fetchJobTitles } from '../lib/jobTitles';
+import { fetchSpecialties } from '../lib/specialties';
 import './CompletarPerfil.css';
 
 export function CompletarPerfil() {
@@ -13,7 +15,9 @@ export function CompletarPerfil() {
   const [councilType, setCouncilType] = useState('');
   const [councilNumber, setCouncilNumber] = useState('');
   const [councilUf, setCouncilUf] = useState('');
-  const [specialtiesText, setSpecialtiesText] = useState('');
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
+  const [jobTitlesList, setJobTitlesList] = useState<{ id: string; name: string }[]>([]);
+  const [specialtiesList, setSpecialtiesList] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -28,10 +32,12 @@ export function CompletarPerfil() {
         setCouncilType(profile.council_type ?? '');
         setCouncilNumber(profile.council_number ?? '');
         setCouncilUf(profile.council_uf ?? '');
-        setSpecialtiesText(Array.isArray(profile.specialties) ? profile.specialties.join(', ') : '');
+        setSelectedSpecialties(Array.isArray(profile.specialties) ? profile.specialties : []);
       }
       setLoading(false);
     });
+    fetchJobTitles().then(({ list }) => setJobTitlesList(list));
+    fetchSpecialties().then(({ list }) => setSpecialtiesList(list));
   }, [user?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,7 +57,7 @@ export function CompletarPerfil() {
       council_type: councilType.trim() || null,
       council_number: councilNumber.trim() || null,
       council_uf: councilUf.trim() || null,
-      specialties: specialtiesText.trim() ? specialtiesText.split(',').map((s) => s.trim()).filter(Boolean) : null,
+      specialties: selectedSpecialties.length ? selectedSpecialties : null,
     });
     setSaving(false);
     if (error) {
@@ -93,13 +99,16 @@ export function CompletarPerfil() {
           </label>
           <label className="completar-perfil-label">
             Cargo / função no time
-            <input
-              type="text"
+            <select
               value={jobTitle}
               onChange={(e) => setJobTitle(e.target.value)}
               className="completar-perfil-input"
-              placeholder="Ex.: Psicólogo, Terapeuta ABA"
-            />
+            >
+              <option value="">Selecione...</option>
+              {jobTitlesList.map((j) => (
+                <option key={j.id} value={j.name}>{j.name}</option>
+              ))}
+            </select>
           </label>
           <label className="completar-perfil-label">
             Conselho profissional
@@ -132,16 +141,24 @@ export function CompletarPerfil() {
               maxLength={2}
             />
           </label>
-          <label className="completar-perfil-label">
-            Especialidades (separadas por vírgula)
-            <input
-              type="text"
-              value={specialtiesText}
-              onChange={(e) => setSpecialtiesText(e.target.value)}
-              className="completar-perfil-input"
-              placeholder="Ex.: Psicologia clínica, ABA"
-            />
-          </label>
+          <div className="completar-perfil-specialties">
+            <span className="completar-perfil-label">Especialidades</span>
+            <div className="completar-perfil-specialties-chips">
+              {specialtiesList.map((s) => (
+                <label key={s.id} className="completar-perfil-specialty-chip">
+                  <input
+                    type="checkbox"
+                    checked={selectedSpecialties.includes(s.name)}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedSpecialties((prev) => [...prev, s.name]);
+                      else setSelectedSpecialties((prev) => prev.filter((n) => n !== s.name));
+                    }}
+                  />
+                  <span>{s.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
           {message && <p className="completar-perfil-message">{message}</p>}
           <button type="submit" className="completar-perfil-submit" disabled={saving}>
             {saving ? 'Salvando…' : 'Continuar para a Agenda'}

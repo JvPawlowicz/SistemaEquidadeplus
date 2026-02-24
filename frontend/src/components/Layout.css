@@ -4,14 +4,16 @@
 }
 
 .layout-main {
-  padding-top: 56px;
-  min-height: calc(100vh - 56px);
+  padding-top: 52px;
+  min-height: calc(100vh - 52px);
 }
 
 .page-container {
   max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   padding: 24px 20px;
+  box-sizing: border-box;
 }
 
 .page-card {
@@ -21,4 +23,6 @@
   border: 1px solid var(--color-border-light);
   min-height: 400px;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }

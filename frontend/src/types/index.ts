@@ -48,6 +48,7 @@ export interface Unit {
   timezone: string;
   organization_id?: string | null;
   address?: string | null;
+  cep?: string | null;
   cnpj?: string | null;
   phone?: string | null;
   email?: string | null;

@@ -58,6 +58,22 @@ Execute as migrations **na ordem** pelo **SQL Editor** do Supabase (ou via CLI):
 | 15 | `supabase/migrations/00015_notes_addendum.sql` | Coluna addendum em notes (adendo na evolução) |
 | 16 | `supabase/migrations/00016_patient_tags.sql` | Coluna tags em patients |
 | 17 | `supabase/migrations/00017_aba_templates.sql` | Tabela aba_templates |
+| 18 | `supabase/migrations/00018_aba_session_data.sql` | Coleta ABA por sessão (evolução) |
+| 19 | `supabase/migrations/00019_appointment_types.sql` | Tipos de atendimento por unidade |
+| 20 | `supabase/migrations/00020_organizations.sql` | Organizações (multi-tenant) |
+| 21 | `supabase/migrations/00021_patient_document.sql` | Coluna document em patients |
+| 22 | `supabase/migrations/00022_notes_tags.sql` | Coluna tags em notes |
+| 23 | `supabase/migrations/00023_profiles_default_unit.sql` | Unidade padrão do perfil |
+| 24 | `supabase/migrations/00024_realtime_events.sql` | Realtime na tabela events (agenda) |
+| 25 | `supabase/migrations/00025_units_tags_events_color.sql` | Tags de pacientes, units (endereço, CNPJ, etc.), events.color_hex |
+| 26 | `supabase/migrations/00026_profiles_extra_fields.sql` | phone, job_title, bio em profiles |
+| 27 | `supabase/migrations/00027_schema_cache_sync.sql` | Sincronização de colunas (schema cache) |
+| 28 | `supabase/migrations/00028_storage_rls_relax_authenticated.sql` | Storage: políticas relaxadas para autenticados |
+| 29 | `supabase/migrations/00029_config_job_titles_specialties.sql` | config_job_titles, config_specialties (admin; perfil) |
+| 30 | `supabase/migrations/00030_aba_template_goals.sql` | Metas por template ABA |
+| 31 | `supabase/migrations/00031_units_cep.sql` | Coluna cep em units (fuso por CEP) |
+
+As políticas RLS para os buckets estão nas migrations 00011, 00012, 00014 e 00028.
 
 ### 3. Supabase: buckets de Storage
 
@@ -66,8 +82,6 @@ Crie no **Dashboard → Storage** os buckets (todos **públicos** se usar URL p�
 - **attachments** — anexos (prontuário, evento, chamado, etc.)
 - **avatars** — foto de perfil do usuário
 - **patients** — foto do paciente
-
-As políticas RLS para esses buckets estão nas migrations 00011, 00012 e 00014.
 
 ### 4. Seed inicial (opcional)
 

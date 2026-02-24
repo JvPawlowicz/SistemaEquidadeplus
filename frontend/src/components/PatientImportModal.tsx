@@ -78,7 +78,8 @@ export function PatientImportModal({ unitId, onClose, onSaved }: PatientImportMo
         </div>
         <div className="patient-import-body">
           <p className="patient-import-intro">
-            Use o modelo com as colunas corretas. Data no formato <strong>AAAA-MM-DD</strong>. Convênio = nome exato em Configurações.
+            Todos os pacientes serão cadastrados na <strong>unidade ativa</strong>. Depois você pode habilitá-los em outras unidades no prontuário.
+            Coluna de data aceita número (Excel) ou AAAA-MM-DD. Convênio = nome exato em Configurações.
           </p>
           <div className="patient-import-actions">
             <button type="button" className="patient-import-btn patient-import-btn-download" onClick={handleDownloadTemplate}>

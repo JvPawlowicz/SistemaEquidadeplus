@@ -1,5 +1,7 @@
 .completar-perfil-page {
   min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,4 +74,36 @@
 .completar-perfil-submit:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.completar-perfil-specialties {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.completar-perfil-specialties .completar-perfil-label {
+  margin-bottom: 4px;
+}
+
+.completar-perfil-specialties-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.completar-perfil-specialty-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--color-bg-subtle, #f8f9fa);
+  border: 1px solid var(--color-border, #e8e8ec);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.completar-perfil-specialty-chip input {
+  margin: 0;
 }

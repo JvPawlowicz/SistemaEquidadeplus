@@ -21,23 +21,25 @@ import {
   deleteTicketCategory,
   updateProfile,
 } from '../lib/config';
-import { fetchUsersForAdmin, setProfileBlocked, removeUserFromUnit, setUserUnitRole, inviteUserByEmail, generateResetPasswordLink } from '../lib/users';
+import { fetchUsersForAdmin, setProfileBlocked, removeUserFromUnit, setUserUnitRole, inviteUserByEmail, generateResetPasswordLink, createUserWithPassword, adminSetPassword } from '../lib/users';
 import { fetchRooms as fetchRoomsAgenda } from '../lib/agenda';
+import { fetchCep, formatCep, getTimezoneFromState } from '../lib/cep';
 import { fetchAssetsInUnit, createAsset, updateAsset, deleteAsset } from '../lib/assets';
 import { fetchNoteTemplates, createNoteTemplate, updateNoteTemplate, deleteNoteTemplate } from '../lib/noteTemplates';
 import { fetchTemplatesByUnit, createTemplate, updateTemplate, deleteTemplate, cloneTemplateAsNewVersion } from '../lib/avaliacoes';
-import { fetchAbaTemplatesByUnit, createAbaTemplate, updateAbaTemplate, deleteAbaTemplate, type AbaTemplate } from '../lib/abaTemplates';
+import { fetchAbaTemplatesByUnit, createAbaTemplate, updateAbaTemplate, deleteAbaTemplate, fetchAbaTemplateGoals, createAbaTemplateGoal, deleteAbaTemplateGoal, type AbaTemplate } from '../lib/abaTemplates';
 import { fetchAppointmentTypesByUnit, createAppointmentType, updateAppointmentType, deleteAppointmentType } from '../lib/appointmentTypes';
-import { fetchOrganizations, createOrganization, updateOrganization, deleteOrganization } from '../lib/organizations';
 import { fetchPatientTagDefinitions, createPatientTagDefinition, updatePatientTagDefinition, deletePatientTagDefinition } from '../lib/patientTagDefinitions';
-import type { Unit, Room, Insurance, TicketCategory, Asset, NoteTemplate, AppointmentType, Organization } from '../types';
+import { fetchSpecialties, createSpecialty, updateSpecialty, deleteSpecialty } from '../lib/specialties';
+import type { ConfigSpecialty } from '../lib/specialties';
+import type { Unit, Room, Insurance, TicketCategory, Asset, NoteTemplate, AppointmentType } from '../types';
 import type { EvaluationTemplate, EvaluationType } from '../types';
 import type { AppRole } from '../types';
 import type { PatientTagDefinition } from '../types';
 import type { UserWithUnits } from '../lib/users';
 import './Configuracoes.css';
 
-type ConfigTab = 'unidades' | 'organizacoes' | 'salas' | 'tipos-atendimento' | 'convenios' | 'categorias' | 'tags-pacientes' | 'usuarios' | 'ativos' | 'templates' | 'templates-avaliacao' | 'templates-aba';
+type ConfigTab = 'unidades' | 'tipos-atendimento' | 'convenios' | 'categorias' | 'tags-pacientes' | 'especialidades' | 'usuarios' | 'ativos' | 'templates' | 'templates-avaliacao' | 'templates-aba';
 
 export function Configuracoes() {
   const { user } = useAuth();
@@ -58,17 +60,12 @@ export function Configuracoes() {
   const [evalTemplates, setEvalTemplates] = useState<EvaluationTemplate[]>([]);
   const [abaTemplates, setAbaTemplates] = useState<AbaTemplate[]>([]);
   const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>([]);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [tagDefinitions, setTagDefinitions] = useState<PatientTagDefinition[]>([]);
+  const [specialties, setSpecialties] = useState<ConfigSpecialty[]>([]);
   const [loading, setLoading] = useState(false);
 
   const loadTagDefinitions = () => fetchPatientTagDefinitions().then(({ definitions: d }) => setTagDefinitions(d ?? []));
   const loadUnits = () => fetchAllUnits().then(({ units: u }) => setUnits(u));
-  const loadOrganizations = () => fetchOrganizations().then(({ organizations: o }) => setOrganizations(o ?? []));
-  const loadRooms = () => {
-    if (!activeUnitId) return;
-    fetchRoomsAgenda(activeUnitId).then(({ rooms: r }) => setRooms(r));
-  };
   const loadInsurances = () => fetchInsurances().then(({ insurances: i }) => setInsurances(i));
   const loadCategories = () => fetchTicketCategoriesConfig().then(({ categories: c }) => setCategories(c));
   const loadUsers = () => fetchUsersForAdmin().then(({ users: u }) => setUsers(u));
@@ -77,13 +74,13 @@ export function Configuracoes() {
   const loadEvalTemplates = () => activeUnitId && fetchTemplatesByUnit(activeUnitId).then(({ templates: t }) => setEvalTemplates(t ?? []));
   const loadAbaTemplates = () => activeUnitId && fetchAbaTemplatesByUnit(activeUnitId).then(({ templates: t }) => setAbaTemplates(t ?? []));
   const loadAppointmentTypes = () => activeUnitId && fetchAppointmentTypesByUnit(activeUnitId).then(({ types: t }) => setAppointmentTypes(t ?? []));
+  const loadSpecialties = () => fetchSpecialties().then(({ list }) => setSpecialties(list));
 
   useEffect(() => { loadUnits(); }, []);
-  useEffect(() => { if (tab === 'organizacoes') loadOrganizations(); }, [tab]);
-  useEffect(() => { if (activeUnitId && tab === 'salas') loadRooms(); }, [activeUnitId, tab]);
   useEffect(() => { if (tab === 'convenios') loadInsurances(); }, [tab]);
   useEffect(() => { if (tab === 'categorias') loadCategories(); }, [tab]);
   useEffect(() => { if (tab === 'tags-pacientes') loadTagDefinitions(); }, [tab]);
+  useEffect(() => { if (tab === 'especialidades') loadSpecialties(); }, [tab]);
   useEffect(() => { if (tab === 'usuarios') loadUsers(); }, [tab]);
   useEffect(() => { if (tab === 'ativos' && activeUnitId) loadAssets(); }, [tab, activeUnitId]);
   useEffect(() => { if (tab === 'templates' && activeUnitId) loadTemplates(); }, [tab, activeUnitId]);
@@ -125,7 +122,6 @@ export function Configuracoes() {
           <option value="compacta">Compacta</option>
         </select>
         <Link to="/configuracoes/perfil" className="config-btn-link">Meu Perfil</Link>
-        <Link to="/completar-perfil" className="config-btn-link">Completar perfil</Link>
       </div>
       {!isAdmin && (
         <p className="configuracoes-no-admin">Apenas administradores podem gerenciar unidades, salas, convênios e categorias.</p>
@@ -133,7 +129,7 @@ export function Configuracoes() {
       {isAdmin && (
         <>
           <div className="configuracoes-tabs">
-            {(['unidades', 'organizacoes', 'salas', 'tipos-atendimento', 'convenios', 'categorias', 'tags-pacientes', 'usuarios', 'ativos', 'templates', 'templates-avaliacao', 'templates-aba'] as ConfigTab[]).map((t) => (
+            {(['unidades', 'tipos-atendimento', 'convenios', 'categorias', 'tags-pacientes', 'especialidades', 'usuarios', 'ativos', 'templates', 'templates-avaliacao', 'templates-aba'] as ConfigTab[]).map((t) => (
               <button
                 key={t}
                 type="button"
@@ -141,12 +137,11 @@ export function Configuracoes() {
                 onClick={() => setTab(t)}
               >
                 {t === 'unidades' && 'Unidades'}
-                {t === 'organizacoes' && 'Organizações'}
-                {t === 'salas' && 'Salas'}
                 {t === 'tipos-atendimento' && 'Tipos de atendimento'}
                 {t === 'convenios' && 'Convênios'}
                 {t === 'categorias' && 'Categorias de chamados'}
                 {t === 'tags-pacientes' && 'Tags de pacientes'}
+                {t === 'especialidades' && 'Especialidades'}
                 {t === 'usuarios' && 'Usuários'}
                 {t === 'ativos' && 'Ativos'}
                 {t === 'templates' && 'Templates de texto'}
@@ -158,12 +153,6 @@ export function Configuracoes() {
 
           {tab === 'unidades' && (
             <ConfigUnidades units={units} onSaved={loadUnits} loading={loading} setLoading={setLoading} />
-          )}
-          {tab === 'organizacoes' && (
-            <ConfigOrganizacoes organizations={organizations} onSaved={loadOrganizations} loading={loading} setLoading={setLoading} />
-          )}
-          {tab === 'salas' && activeUnitId && (
-            <ConfigSalas unitId={activeUnitId} units={units} rooms={rooms} onSaved={loadRooms} loading={loading} setLoading={setLoading} />
           )}
           {tab === 'tipos-atendimento' && activeUnitId && (
             <ConfigTiposAtendimento unitId={activeUnitId} units={units} types={appointmentTypes} onSaved={loadAppointmentTypes} loading={loading} setLoading={setLoading} />
@@ -177,8 +166,11 @@ export function Configuracoes() {
           {tab === 'tags-pacientes' && (
             <ConfigTagsPacientes definitions={tagDefinitions} onSaved={loadTagDefinitions} loading={loading} setLoading={setLoading} />
           )}
+          {tab === 'especialidades' && (
+            <ConfigEspecialidades items={specialties} onSaved={loadSpecialties} loading={loading} setLoading={setLoading} />
+          )}
           {tab === 'usuarios' && (
-            <ConfigUsuarios users={users} onSaved={loadUsers} loading={loading} setLoading={setLoading} />
+            <ConfigUsuarios users={users} units={units} onSaved={loadUsers} loading={loading} setLoading={setLoading} />
           )}
           {tab === 'ativos' && activeUnitId && (
             <ConfigAtivos unitId={activeUnitId} units={units} assets={assets} onSaved={loadAssets} loading={loading} setLoading={setLoading} />
@@ -214,9 +206,25 @@ function ConfigUnidades({
   const [name, setName] = useState('');
   const [timezone, setTimezone] = useState('America/Sao_Paulo');
   const [address, setAddress] = useState('');
+  const [cep, setCep] = useState('');
   const [cnpj, setCnpj] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [unitRooms, setUnitRooms] = useState<Room[]>([]);
+  const [roomEditing, setRoomEditing] = useState<Room | null>(null);
+  const [roomAdding, setRoomAdding] = useState(false);
+  const [roomName, setRoomName] = useState('');
+  const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError] = useState<string | null>(null);
+
+  const loadRoomsForUnit = (unitId: string) => {
+    fetchRoomsAgenda(unitId).then(({ rooms: r }) => setUnitRooms(r ?? []));
+  };
+
+  useEffect(() => {
+    if (editing?.id) loadRoomsForUnit(editing.id);
+    else setUnitRooms([]);
+  }, [editing?.id]);
 
   const resetForm = () => {
     setAdding(false);
@@ -224,9 +232,51 @@ function ConfigUnidades({
     setName('');
     setTimezone('America/Sao_Paulo');
     setAddress('');
+    setCep('');
     setCnpj('');
     setPhone('');
     setEmail('');
+    setRoomEditing(null);
+    setRoomAdding(false);
+    setRoomName('');
+    setCepError(null);
+  };
+
+  const openNewForm = () => {
+    setEditing(null);
+    setName('');
+    setTimezone('America/Sao_Paulo');
+    setAddress('');
+    setCep('');
+    setCnpj('');
+    setPhone('');
+    setEmail('');
+    setRoomAdding(false);
+    setRoomEditing(null);
+    setRoomName('');
+    setCepError(null);
+    setAdding(true);
+  };
+
+  const handleBuscarCep = async () => {
+    const digits = cep.replace(/\D/g, '');
+    if (digits.length !== 8) {
+      setCepError('CEP deve ter 8 dígitos.');
+      return;
+    }
+    setCepError(null);
+    setCepLoading(true);
+    const { data, error } = await fetchCep(cep);
+    setCepLoading(false);
+    if (error) {
+      setCepError(error);
+      return;
+    }
+    if (data) {
+      setAddress(data.formattedAddress);
+      setTimezone(getTimezoneFromState(data.state));
+      setCep(data.cep ?? cep);
+    }
   };
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -235,6 +285,7 @@ function ConfigUnidades({
     setLoading(true);
     const { error } = await createUnit(name.trim(), timezone, {
       address: address.trim() || undefined,
+      cep: cep.trim() || undefined,
       cnpj: cnpj.trim() || undefined,
       phone: phone.trim() || undefined,
       email: email.trim() || undefined,
@@ -254,6 +305,7 @@ function ConfigUnidades({
       name: name.trim(),
       timezone,
       address: address.trim() || null,
+      cep: cep.trim() || null,
       cnpj: cnpj.trim() || null,
       phone: phone.trim() || null,
       email: email.trim() || null,
@@ -265,11 +317,45 @@ function ConfigUnidades({
     }
   };
 
+  const handleRoomAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing || !roomName.trim()) return;
+    setLoading(true);
+    const { error } = await createRoom(editing.id, roomName.trim());
+    setLoading(false);
+    if (!error) {
+      setRoomAdding(false);
+      setRoomName('');
+      loadRoomsForUnit(editing.id);
+    }
+  };
+
+  const handleRoomEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!roomEditing) return;
+    setLoading(true);
+    const { error } = await updateRoom(roomEditing.id, roomName.trim());
+    setLoading(false);
+    if (!error) {
+      setRoomEditing(null);
+      setRoomName('');
+      if (editing) loadRoomsForUnit(editing.id);
+    }
+  };
+
+  const handleRoomDelete = async (id: string) => {
+    if (!confirm('Excluir esta sala?')) return;
+    setLoading(true);
+    const { error } = await deleteRoom(id);
+    setLoading(false);
+    if (!error && editing) loadRoomsForUnit(editing.id);
+  };
+
   return (
     <div className="config-block">
       <div className="config-toolbar">
         {!adding && !editing && (
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); resetForm(); }}>
+          <button type="button" className="config-btn-add" onClick={openNewForm}>
             + Nova unidade
           </button>
         )}
@@ -281,9 +367,25 @@ function ConfigUnidades({
             <span>Nome *</span>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Unidade Centro" required className="config-input" />
           </label>
+          <div className="config-form-label-block config-form-cep-row">
+            <label style={{ flex: 1 }}>
+              <span>CEP</span>
+              <input
+                type="text"
+                value={formatCep(cep)}
+                onChange={(e) => setCep(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                placeholder="00000-000"
+                className="config-input"
+              />
+            </label>
+            <button type="button" className="config-btn-add config-btn-buscar-cep" onClick={handleBuscarCep} disabled={cepLoading}>
+              {cepLoading ? 'Buscando…' : 'Buscar CEP'}
+            </button>
+          </div>
+          {cepError && <p className="config-cep-error">{cepError}</p>}
           <label className="config-form-label-block">
             <span>Endereço</span>
-            <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Endereço completo" className="config-input" />
+            <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Endereço completo (ou use Buscar CEP)" className="config-input" />
           </label>
           <label className="config-form-label-block">
             <span>CNPJ</span>
@@ -299,7 +401,7 @@ function ConfigUnidades({
           </label>
           <label className="config-form-label-block">
             <span>Fuso horário</span>
-            <input type="text" value={timezone} onChange={(e) => setTimezone(e.target.value)} placeholder="America/Sao_Paulo" className="config-input" />
+            <input type="text" value={timezone} onChange={(e) => setTimezone(e.target.value)} placeholder="America/Sao_Paulo (preenchido ao buscar CEP)" className="config-input" />
           </label>
           <div className="config-form-actions">
             <button type="submit" className="config-btn-save" disabled={loading}>{editing ? 'Salvar' : 'Criar'}</button>
@@ -307,10 +409,50 @@ function ConfigUnidades({
           </div>
         </form>
       )}
+      {editing && (
+        <div className="config-unidades-salas">
+          <h4 className="config-unidades-salas-title">Salas desta unidade</h4>
+          <div className="config-toolbar">
+            {!roomAdding && !roomEditing && (
+              <button type="button" className="config-btn-add" onClick={() => { setRoomAdding(true); setRoomName(''); }}>+ Nova sala</button>
+            )}
+          </div>
+          {(roomAdding || roomEditing) && (
+            <form onSubmit={roomEditing ? handleRoomEdit : handleRoomAdd} className="config-form config-form-labeled config-form-inline">
+            <label className="config-form-label-block">
+              <span>Nome da sala *</span>
+              <input type="text" value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="Ex.: Sala 1" required className="config-input" />
+            </label>
+            <div className="config-form-actions">
+              <button type="submit" className="config-btn-save" disabled={loading}>{roomEditing ? 'Salvar' : 'Criar'}</button>
+              <button type="button" className="config-btn-cancel" onClick={() => { setRoomAdding(false); setRoomEditing(null); setRoomName(''); }}>Cancelar</button>
+            </div>
+          </form>
+          )}
+          {unitRooms.length === 0 && !roomAdding && !roomEditing ? (
+            <p className="config-empty-inline">Nenhuma sala. Adicione acima.</p>
+          ) : (
+            <table className="config-table">
+              <thead><tr><th>Nome</th><th></th></tr></thead>
+              <tbody>
+                {unitRooms.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.name}</td>
+                    <td>
+                      <button type="button" className="config-btn-edit" onClick={() => { setRoomEditing(r); setRoomName(r.name); setRoomAdding(false); }}>Editar</button>
+                      <button type="button" className="config-btn-delete" onClick={() => handleRoomDelete(r.id)}>Excluir</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
       {units.length === 0 && !adding && !editing ? (
         <div className="config-empty">
           <p>Nenhuma unidade cadastrada.</p>
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); resetForm(); }}>+ Criar primeira unidade</button>
+          <button type="button" className="config-btn-add" onClick={openNewForm}>+ Criar primeira unidade</button>
         </div>
       ) : (
       <table className="config-table">
@@ -321,188 +463,7 @@ function ConfigUnidades({
               <td>{u.name}</td>
               <td className="config-template-preview">{(u.address ?? '') || (u.cnpj ? `CNPJ ${u.cnpj}` : '—')}</td>
               <td>
-                <button type="button" className="config-btn-edit" onClick={() => { setEditing(u); setName(u.name); setTimezone(u.timezone); setAddress(u.address ?? ''); setCnpj(u.cnpj ?? ''); setPhone(u.phone ?? ''); setEmail(u.email ?? ''); setAdding(false); }}>Editar</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      )}
-    </div>
-  );
-}
-
-function ConfigSalas({
-  unitId,
-  units,
-  rooms,
-  onSaved,
-  loading,
-  setLoading,
-}: {
-  unitId: string;
-  units: Unit[];
-  rooms: Room[];
-  onSaved: () => void;
-  loading: boolean;
-  setLoading: (v: boolean) => void;
-}) {
-  const [editing, setEditing] = useState<Room | null>(null);
-  const [adding, setAdding] = useState(false);
-  const [name, setName] = useState('');
-
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    setLoading(true);
-    const { error } = await createRoom(unitId, name.trim());
-    setLoading(false);
-    if (!error) { setAdding(false); setName(''); onSaved(); }
-  };
-
-  const handleEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editing) return;
-    setLoading(true);
-    const { error } = await updateRoom(editing.id, name.trim());
-    setLoading(false);
-    if (!error) { setEditing(null); onSaved(); }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Excluir esta sala?')) return;
-    setLoading(true);
-    const { error } = await deleteRoom(id);
-    setLoading(false);
-    if (!error) onSaved();
-  };
-
-  const unitName = units.find((u) => u.id === unitId)?.name ?? unitId;
-  const unitRooms = rooms.filter((r) => r.unit_id === unitId);
-
-  return (
-    <div className="config-block">
-      <p className="config-unit-note">Unidade ativa: <strong>{unitName}</strong>. Salas listadas desta unidade.</p>
-      <div className="config-toolbar">
-        {!adding && !editing && (
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); setName(''); }}>+ Nova sala</button>
-        )}
-      </div>
-      {(adding || editing) && (
-        <form onSubmit={editing ? handleEdit : handleAdd} className="config-form config-form-labeled">
-          <h3 className="config-form-title">{editing ? 'Editar sala' : 'Nova sala'}</h3>
-          <label className="config-form-label-block">
-            <span>Nome *</span>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Sala 1" required className="config-input" />
-          </label>
-          <div className="config-form-actions">
-            <button type="submit" className="config-btn-save" disabled={loading}>{editing ? 'Salvar' : 'Criar'}</button>
-            <button type="button" className="config-btn-cancel" onClick={() => { setAdding(false); setEditing(null); }}>Cancelar</button>
-          </div>
-        </form>
-      )}
-      {unitRooms.length === 0 && !adding && !editing ? (
-        <div className="config-empty">
-          <p>Nenhuma sala nesta unidade.</p>
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); setName(''); }}>+ Criar primeira sala</button>
-        </div>
-      ) : (
-      <table className="config-table">
-        <thead><tr><th>Nome</th><th></th></tr></thead>
-        <tbody>
-          {unitRooms.map((r) => (
-            <tr key={r.id}>
-              <td>{r.name}</td>
-              <td>
-                <button type="button" className="config-btn-edit" onClick={() => { setEditing(r); setName(r.name); setAdding(false); }}>Editar</button>
-                <button type="button" className="config-btn-delete" onClick={() => handleDelete(r.id)}>Excluir</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      )}
-    </div>
-  );
-}
-
-function ConfigOrganizacoes({
-  organizations,
-  onSaved,
-  loading,
-  setLoading,
-}: {
-  organizations: Organization[];
-  onSaved: () => void;
-  loading: boolean;
-  setLoading: (v: boolean) => void;
-}) {
-  const [editing, setEditing] = useState<Organization | null>(null);
-  const [adding, setAdding] = useState(false);
-  const [name, setName] = useState('');
-
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    setLoading(true);
-    const { error } = await createOrganization(name.trim());
-    setLoading(false);
-    if (!error) { setAdding(false); setName(''); onSaved(); }
-  };
-
-  const handleEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editing) return;
-    setLoading(true);
-    const { error } = await updateOrganization(editing.id, name.trim());
-    setLoading(false);
-    if (!error) { setEditing(null); onSaved(); }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Excluir esta organização? Unidades vinculadas ficarão sem organização.')) return;
-    setLoading(true);
-    const { error } = await deleteOrganization(id);
-    setLoading(false);
-    if (!error) onSaved();
-  };
-
-  return (
-    <div className="config-block">
-      <p className="config-hint">Organizações (multi-tenant). Opcional: vincule unidades a uma organização em Unidades.</p>
-      <div className="config-toolbar">
-        {!adding && !editing && (
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); setName(''); }}>+ Nova organização</button>
-        )}
-      </div>
-      {(adding || editing) && (
-        <form onSubmit={editing ? handleEdit : handleAdd} className="config-form config-form-labeled">
-          <h3 className="config-form-title">{editing ? 'Editar organização' : 'Nova organização'}</h3>
-          <label className="config-form-label-block">
-            <span>Nome *</span>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Clínica XYZ" required className="config-input" />
-          </label>
-          <div className="config-form-actions">
-            <button type="submit" className="config-btn-save" disabled={loading}>{editing ? 'Salvar' : 'Criar'}</button>
-            <button type="button" className="config-btn-cancel" onClick={() => { setAdding(false); setEditing(null); }}>Cancelar</button>
-          </div>
-        </form>
-      )}
-      {organizations.length === 0 && !adding && !editing ? (
-        <div className="config-empty">
-          <p>Nenhuma organização cadastrada.</p>
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); setName(''); }}>+ Criar primeira organização</button>
-        </div>
-      ) : (
-      <table className="config-table">
-        <thead><tr><th>Nome</th><th></th></tr></thead>
-        <tbody>
-          {organizations.map((o) => (
-            <tr key={o.id}>
-              <td>{o.name}</td>
-              <td>
-                <button type="button" className="config-btn-edit" onClick={() => { setEditing(o); setName(o.name); setAdding(false); }}>Editar</button>
-                <button type="button" className="config-btn-delete" onClick={() => handleDelete(o.id)}>Excluir</button>
+                <button type="button" className="config-btn-edit" onClick={() => { setEditing(u); setName(u.name); setTimezone(u.timezone); setAddress(u.address ?? ''); setCep(u.cep ?? ''); setCnpj(u.cnpj ?? ''); setPhone(u.phone ?? ''); setEmail(u.email ?? ''); setAdding(false); setCepError(null); }}>Editar</button>
               </td>
             </tr>
           ))}
@@ -805,6 +766,14 @@ function ConfigAtivos({
     setStatus('ativo');
   };
 
+  const openNewForm = () => {
+    setEditing(null);
+    setName('');
+    setAssetType('');
+    setStatus('ativo');
+    setAdding(true);
+  };
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -838,7 +807,7 @@ function ConfigAtivos({
       <p className="config-unit-note">Unidade ativa: <strong>{unitName}</strong>. Ativos listados desta unidade.</p>
       <div className="config-toolbar">
         {!adding && !editing && (
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); resetForm(); }}>+ Novo ativo</button>
+          <button type="button" className="config-btn-add" onClick={openNewForm}>+ Novo ativo</button>
         )}
       </div>
       {(adding || editing) && (
@@ -869,7 +838,7 @@ function ConfigAtivos({
       {assets.length === 0 && !adding && !editing ? (
         <div className="config-empty">
           <p>Nenhum ativo nesta unidade.</p>
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); resetForm(); }}>+ Criar primeiro ativo</button>
+          <button type="button" className="config-btn-add" onClick={openNewForm}>+ Criar primeiro ativo</button>
         </div>
       ) : (
       <table className="config-table">
@@ -920,6 +889,13 @@ function ConfigTemplates({
     setContent('');
   };
 
+  const openNewForm = () => {
+    setEditing(null);
+    setName('');
+    setContent('');
+    setAdding(true);
+  };
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -953,7 +929,7 @@ function ConfigTemplates({
       <p className="config-unit-note">Unidade ativa: <strong>{unitName}</strong>. Templates disponíveis no editor de evolução/ata.</p>
       <div className="config-toolbar">
         {!adding && !editing && (
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); resetForm(); }}>+ Novo template de texto</button>
+          <button type="button" className="config-btn-add" onClick={openNewForm}>+ Novo template de texto</button>
         )}
       </div>
       {(adding || editing) && (
@@ -976,7 +952,7 @@ function ConfigTemplates({
       {templates.length === 0 && !adding && !editing ? (
         <div className="config-empty">
           <p>Nenhum template de texto nesta unidade.</p>
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); resetForm(); }}>+ Criar primeiro template</button>
+          <button type="button" className="config-btn-add" onClick={openNewForm}>+ Criar primeiro template</button>
         </div>
       ) : (
       <table className="config-table">
@@ -1035,6 +1011,14 @@ function ConfigTemplatesAvaliacao({
     setSchemaJson('[]');
   };
 
+  const openNewForm = () => {
+    setEditing(null);
+    setName('');
+    setType('avaliacao_interna');
+    setSchemaJson('[]');
+    setAdding(true);
+  };
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -1090,7 +1074,7 @@ function ConfigTemplatesAvaliacao({
       <p className="config-unit-note">Unidade ativa: <strong>{unitName}</strong>. Templates usados nas avaliações do prontuário (anamnese, consentimento, etc.).</p>
       <div className="config-toolbar">
         {!adding && !editing && (
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); resetForm(); }}>+ Novo template de avaliação</button>
+          <button type="button" className="config-btn-add" onClick={openNewForm}>+ Novo template de avaliação</button>
         )}
       </div>
       {(adding || editing) && (
@@ -1121,7 +1105,7 @@ function ConfigTemplatesAvaliacao({
       {templates.length === 0 && !adding && !editing ? (
         <div className="config-empty">
           <p>Nenhum template de avaliação nesta unidade.</p>
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); resetForm(); }}>+ Criar primeiro template</button>
+          <button type="button" className="config-btn-add" onClick={openNewForm}>+ Criar primeiro template</button>
         </div>
       ) : (
       <table className="config-table">
@@ -1173,6 +1157,13 @@ function ConfigTemplatesAba({
     setDescription('');
   };
 
+  const openNewForm = () => {
+    setEditing(null);
+    setName('');
+    setDescription('');
+    setAdding(true);
+  };
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -1206,7 +1197,7 @@ function ConfigTemplatesAba({
       <p className="config-unit-note">Unidade ativa: <strong>{unitName}</strong>. Templates para criar programa ABA a partir de template no prontuário.</p>
       <div className="config-toolbar">
         {!adding && !editing && (
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); resetForm(); }}>+ Novo template ABA</button>
+          <button type="button" className="config-btn-add" onClick={openNewForm}>+ Novo template ABA</button>
         )}
       </div>
       {(adding || editing) && (
@@ -1229,7 +1220,7 @@ function ConfigTemplatesAba({
       {templates.length === 0 && !adding && !editing ? (
         <div className="config-empty">
           <p>Nenhum template ABA nesta unidade.</p>
-          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); resetForm(); }}>+ Criar primeiro template</button>
+          <button type="button" className="config-btn-add" onClick={openNewForm}>+ Criar primeiro template</button>
         </div>
       ) : (
       <table className="config-table">
@@ -1242,6 +1233,99 @@ function ConfigTemplatesAba({
               <td>
                 <button type="button" className="config-btn-edit" onClick={() => { setEditing(t); setName(t.name); setDescription(t.description ?? ''); setAdding(false); }}>Editar</button>
                 <button type="button" className="config-btn-delete" onClick={() => handleDelete(t.id)}>Excluir</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      )}
+    </div>
+  );
+}
+
+function ConfigEspecialidades({
+  items,
+  onSaved,
+  loading,
+  setLoading,
+}: {
+  items: ConfigSpecialty[];
+  onSaved: () => void;
+  loading: boolean;
+  setLoading: (v: boolean) => void;
+}) {
+  const [editing, setEditing] = useState<ConfigSpecialty | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [name, setName] = useState('');
+
+  const resetForm = () => {
+    setAdding(false);
+    setEditing(null);
+    setName('');
+  };
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setLoading(true);
+    const { error } = await createSpecialty(name.trim());
+    setLoading(false);
+    if (!error) { resetForm(); onSaved(); }
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    setLoading(true);
+    const { error } = await updateSpecialty(editing.id, name.trim());
+    setLoading(false);
+    if (!error) { resetForm(); onSaved(); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Excluir esta especialidade? Usuários que a usam continuarão com o valor salvo no perfil.')) return;
+    setLoading(true);
+    const { error } = await deleteSpecialty(id);
+    setLoading(false);
+    if (!error) onSaved();
+  };
+
+  return (
+    <div className="config-block">
+      <p className="config-unit-note">Especialidades. Os usuários escolhem uma ou mais na tela Meu Perfil.</p>
+      <div className="config-toolbar">
+        {!adding && !editing && (
+          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); setName(''); }}>+ Nova especialidade</button>
+        )}
+      </div>
+      {(adding || editing) && (
+        <form onSubmit={editing ? handleEdit : handleAdd} className="config-form config-form-labeled">
+          <h3 className="config-form-title">{editing ? 'Editar especialidade' : 'Nova especialidade'}</h3>
+          <label className="config-form-label-block">
+            <span>Nome *</span>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Psicologia clínica, ABA" required className="config-input" />
+          </label>
+          <div className="config-form-actions">
+            <button type="submit" className="config-btn-save" disabled={loading}>{editing ? 'Salvar' : 'Criar'}</button>
+            <button type="button" className="config-btn-cancel" onClick={resetForm}>Cancelar</button>
+          </div>
+        </form>
+      )}
+      {items.length === 0 && !adding && !editing ? (
+        <div className="config-empty">
+          <p>Nenhuma especialidade cadastrada.</p>
+          <button type="button" className="config-btn-add" onClick={() => { setAdding(true); setName(''); }}>+ Criar primeira especialidade</button>
+        </div>
+      ) : (
+      <table className="config-table">
+        <thead><tr><th>Nome</th><th></th></tr></thead>
+        <tbody>
+          {items.map((s) => (
+            <tr key={s.id}>
+              <td>{s.name}</td>
+              <td>
+                <button type="button" className="config-btn-edit" onClick={() => { setEditing(s); setName(s.name); setAdding(false); }}>Editar</button>
+                <button type="button" className="config-btn-delete" onClick={() => handleDelete(s.id)}>Excluir</button>
               </td>
             </tr>
           ))}
@@ -1362,20 +1446,34 @@ const ROLES: AppRole[] = ['admin', 'coordenador', 'secretaria', 'profissional', 
 
 function ConfigUsuarios({
   users,
+  units,
   onSaved,
   loading,
   setLoading,
 }: {
   users: UserWithUnits[];
+  units: Unit[];
   onSaved: () => void;
   loading: boolean;
   setLoading: (v: boolean) => void;
 }) {
   const [linkModalOpen, setLinkModalOpen] = useState(false);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [setPasswordModal, setSetPasswordModal] = useState<{ userId: string; userName: string } | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteSending, setInviteSending] = useState(false);
   const [inviteResult, setInviteResult] = useState<{ message?: string; link?: string } | null>(null);
+  const [createEmail, setCreateEmail] = useState('');
+  const [createPassword, setCreatePassword] = useState('');
+  const [createFullName, setCreateFullName] = useState('');
+  const [createUnitId, setCreateUnitId] = useState('');
+  const [createRole, setCreateRole] = useState<AppRole>('profissional');
+  const [createSending, setCreateSending] = useState(false);
+  const [createResult, setCreateResult] = useState<{ message?: string; error?: string } | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [setPasswordSending, setSetPasswordSending] = useState(false);
+  const [setPasswordResult, setSetPasswordResult] = useState<string | null>(null);
   const [resetLinkModal, setResetLinkModal] = useState<{ email: string; link: string } | null>(null);
   const [resetLinkLoadingUserId, setResetLinkLoadingUserId] = useState<string | null>(null);
   const { user: currentUser } = useAuth();
@@ -1425,14 +1523,59 @@ function ConfigUsuarios({
     else alert(result.message ?? 'Link gerado.');
   };
 
+  const handleCreateUserSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createEmail.trim() || !createPassword || !createUnitId.trim()) return;
+    setCreateSending(true);
+    setCreateResult(null);
+    const result = await createUserWithPassword({
+      email: createEmail.trim(),
+      password: createPassword,
+      full_name: createFullName.trim() || undefined,
+      unit_id: createUnitId.trim(),
+      role: createRole,
+    });
+    setCreateSending(false);
+    if (result.error) setCreateResult({ error: result.error });
+    else {
+      setCreateResult({ message: result.message });
+      setCreateModalOpen(false);
+      setCreateEmail('');
+      setCreatePassword('');
+      setCreateFullName('');
+      setCreateUnitId('');
+      setCreateRole('profissional');
+      onSaved();
+    }
+  };
+
+  const handleSetPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!setPasswordModal || !newPassword.trim()) return;
+    setSetPasswordSending(true);
+    setSetPasswordResult(null);
+    const result = await adminSetPassword(setPasswordModal.userId, newPassword.trim());
+    setSetPasswordSending(false);
+    if (result.error) setSetPasswordResult(result.error);
+    else {
+      setSetPasswordResult('Senha alterada com sucesso.');
+      setSetPasswordModal(null);
+      setNewPassword('');
+      setTimeout(() => setSetPasswordResult(null), 3000);
+    }
+  };
+
   return (
     <div className="config-block">
       <div className="config-toolbar config-toolbar-usuarios">
-        <button type="button" className="config-btn-add" onClick={() => setInviteModalOpen(true)}>
-          + Novo usuário
+        <button type="button" className="config-btn-add" onClick={() => { setCreateModalOpen(true); setCreateResult(null); }}>
+          + Criar usuário
+        </button>
+        <button type="button" className="config-btn-add config-btn-add-secondary" onClick={() => setInviteModalOpen(true)}>
+          Convidar por e-mail
         </button>
         <button type="button" className="config-btn-link" onClick={() => setLinkModalOpen(true)}>
-          Instruções (convite / reset)
+          Instruções
         </button>
       </div>
       {linkModalOpen && (
@@ -1440,10 +1583,78 @@ function ConfigUsuarios({
           <div className="config-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Convite e redefinição de senha</h3>
             <p>
-              Use <strong>Enviar convite</strong> para convidar um novo usuário por e-mail. Use <strong>Gerar link de redefinição</strong> na linha do usuário para gerar um link de redefinição de senha.
-              As Edge Functions <code>invite-user</code> e <code>reset-password</code> precisam estar publicadas no Supabase. Se o SMTP estiver configurado, o usuário receberá o e-mail automaticamente.
+              <strong>Criar usuário:</strong> define e-mail e senha; o usuário já pode entrar. Opcionalmente associe a uma unidade e papel.
+              <br /><strong>Convidar por e-mail:</strong> envia link para o usuário definir a senha (requer Edge Function invite-user e SMTP opcional).
+              <br /><strong>Redefinir senha:</strong> o admin define uma nova senha diretamente para o usuário.
             </p>
             <button type="button" className="config-btn-save" onClick={() => setLinkModalOpen(false)}>Fechar</button>
+          </div>
+        </div>
+      )}
+      {createModalOpen && (
+        <div className="config-modal-overlay" onClick={() => { setCreateModalOpen(false); setCreateResult(null); }}>
+          <div className="config-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Criar usuário</h3>
+            <p className="config-modal-desc">O usuário poderá entrar com o e-mail e a senha definidos. Defina a unidade e o papel (role) que ele terá.</p>
+            <form onSubmit={handleCreateUserSubmit}>
+              <label className="config-form-label-block">
+                <span>E-mail *</span>
+                <input type="email" value={createEmail} onChange={(e) => setCreateEmail(e.target.value)} className="config-input" placeholder="email@exemplo.com" required />
+              </label>
+              <label className="config-form-label-block">
+                <span>Senha *</span>
+                <input type="password" value={createPassword} onChange={(e) => setCreatePassword(e.target.value)} className="config-input" placeholder="••••••••" required minLength={6} />
+              </label>
+              <label className="config-form-label-block">
+                <span>Nome completo</span>
+                <input type="text" value={createFullName} onChange={(e) => setCreateFullName(e.target.value)} className="config-input" placeholder="Nome do usuário" />
+              </label>
+              <label className="config-form-label-block">
+                <span>Unidade *</span>
+                <select value={createUnitId} onChange={(e) => setCreateUnitId(e.target.value)} className="config-input" required>
+                  <option value="">— Selecione a unidade —</option>
+                  {units.map((u) => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="config-form-label-block">
+                <span>Papel (role) na unidade *</span>
+                <select value={createRole} onChange={(e) => setCreateRole(e.target.value as AppRole)} className="config-input">
+                  {ROLES.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="config-form-actions">
+                <button type="submit" className="config-btn-save" disabled={createSending}>{createSending ? 'Criando…' : 'Criar usuário'}</button>
+                <button type="button" className="config-btn-cancel" onClick={() => { setCreateModalOpen(false); setCreateResult(null); }}>Cancelar</button>
+              </div>
+            </form>
+            {createResult && (
+              <div className={`config-usuarios-result ${createResult.error ? 'config-usuarios-result-error' : ''}`}>
+                <p>{createResult.error ?? createResult.message}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {setPasswordModal && (
+        <div className="config-modal-overlay" onClick={() => { setSetPasswordModal(null); setNewPassword(''); setSetPasswordResult(null); }}>
+          <div className="config-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Redefinir senha</h3>
+            <p className="config-modal-desc">Nova senha para <strong>{setPasswordModal.userName}</strong></p>
+            <form onSubmit={handleSetPasswordSubmit}>
+              <label className="config-form-label-block">
+                <span>Nova senha *</span>
+                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="config-input" placeholder="••••••••" required minLength={6} />
+              </label>
+              <div className="config-form-actions">
+                <button type="submit" className="config-btn-save" disabled={setPasswordSending}>{setPasswordSending ? 'Salvando…' : 'Definir senha'}</button>
+                <button type="button" className="config-btn-cancel" onClick={() => { setSetPasswordModal(null); setNewPassword(''); }}>Cancelar</button>
+              </div>
+            </form>
+            {setPasswordResult && <p className={setPasswordResult.startsWith('Senha') ? 'config-usuarios-result' : 'config-usuarios-result-error'}>{setPasswordResult}</p>}
           </div>
         </div>
       )}
@@ -1527,11 +1738,20 @@ function ConfigUsuarios({
                 <button
                   type="button"
                   className="config-btn-edit config-btn-small"
+                  onClick={() => setSetPasswordModal({ userId: u.id, userName: u.full_name || u.email || 'Usuário' })}
+                  disabled={loading}
+                  title="Redefinir senha"
+                >
+                  Redefinir senha
+                </button>
+                <button
+                  type="button"
+                  className="config-btn-edit config-btn-small"
                   onClick={() => handleRequestResetLink(u.id, u.email)}
                   disabled={!u.email?.trim() || resetLinkLoadingUserId !== null || loading}
-                  title="Gerar link de redefinição de senha"
+                  title="Gerar link de redefinição"
                 >
-                  {resetLinkLoadingUserId === u.id ? '…' : 'Gerar link de redefinição'}
+                  {resetLinkLoadingUserId === u.id ? '…' : 'Link de redefinição'}
                 </button>
                 <button
                   type="button"

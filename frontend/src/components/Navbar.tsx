@@ -12,6 +12,7 @@ import {
   User,
   LogOut,
   ChevronDown,
+  Clock,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveUnit } from '../contexts/ActiveUnitContext';
@@ -21,12 +22,34 @@ import './Navbar.css';
 export function Navbar() {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
-  const { units, activeUnit, setActiveUnitId, loading: unitsLoading, activeUnitId } = useActiveUnit();
+  const { units, activeUnit, setActiveUnitId, loading: unitsLoading, activeUnitId, timezone } = useActiveUnit();
   const { isTi } = useUserRoleInUnit(activeUnitId, user?.id);
   const [unitDropdownOpen, setUnitDropdownOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [localTime, setLocalTime] = useState('');
   const unitDropdownRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!timezone) return;
+    const format = () => {
+      try {
+        setLocalTime(
+          new Date().toLocaleTimeString('pt-BR', {
+            timeZone: timezone,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          })
+        );
+      } catch {
+        setLocalTime(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+      }
+    };
+    format();
+    const id = setInterval(format, 1000);
+    return () => clearInterval(id);
+  }, [timezone]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -74,13 +97,15 @@ export function Navbar() {
             aria-expanded={unitDropdownOpen}
             aria-haspopup="listbox"
           >
-            {unitsLoading
-              ? 'Carregando…'
-              : activeUnit
-                ? activeUnit.name
-                : units.length === 0
-                  ? 'Nenhuma unidade'
-                  : 'Selecione a unidade'}
+            <span className="navbar-unit-trigger-text">
+              {unitsLoading
+                ? 'Carregando…'
+                : activeUnit
+                  ? activeUnit.name
+                  : units.length === 0
+                    ? 'Nenhuma unidade'
+                    : 'Selecione a unidade'}
+            </span>
             <ChevronDown className="navbar-unit-chevron" size={14} aria-hidden />
           </button>
           {unitDropdownOpen && (
@@ -106,6 +131,13 @@ export function Navbar() {
             </div>
           )}
         </div>
+
+        {activeUnit && localTime && (
+          <div className="navbar-clock" title={`Horário local da unidade (${timezone})`}>
+            <Clock size={16} aria-hidden />
+            <span className="navbar-clock-time">{localTime}</span>
+          </div>
+        )}
 
         <nav className="navbar-menu">
           {!isTi && (

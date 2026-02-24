@@ -4,12 +4,14 @@ Este documento é a referência única para o **MCP Supabase** e para deploy (Re
 
 **Estado atual via MCP (project_id: wwcsmkmwelkgloklbmkw):**
 - **URL:** https://wwcsmkmwelkgloklbmkw.supabase.co
-- **Migrations:** 15 aplicadas (00001_initial_schema → patient_tag_definitions_and_assignments).
-- **Buckets:** avatars, attachments, patients (todos public: true). Conferir: `execute_sql` → `SELECT id, name, public FROM storage.buckets`.
-- **Edge Functions:** invite-user, reset-password (ACTIVE, verify_jwt: true).
-- **Tabelas public (20):** profiles, units, rooms, user_units, insurances, patients, patient_units, events, notes, patient_relatives, ticket_categories, assets, tickets, ticket_comments, appointment_types, organizations, aba_programs, aba_goals, aba_session_data, patient_tag_definitions, patient_tag_assignments.
+- **Migrations:** 00001 → 00031 **aplicadas** (schema e storage RLS atualizados).
+- **Buckets:** avatars, attachments, patients (todos public: true).
+- **Edge Functions:** invite-user, reset-password, create-user, set-password (ACTIVE, verify_jwt: true).
+- **Tabelas public (resumo):** profiles, units (com cep), rooms, user_units, insurances, patients, patient_units, events, notes, patient_tag_definitions, patient_tag_assignments, config_job_titles, config_specialties, evaluation_templates, evaluation_instances, aba_templates, aba_template_goals, aba_programs, aba_goals, tickets, ticket_categories, assets, attachments, note_templates, appointment_types, etc.
 
 Para atualizar: `list_migrations`, `list_edge_functions`, `execute_sql` (storage.buckets), `list_tables` e `get_project_url` com `project_id: wwcsmkmwelkgloklbmkw`.
+
+**Funcionalidades de backend / frontend:** Importar foto de perfil em Meu Perfil (bucket avatars, lib/avatars.ts). Fotos de pacientes (bucket patients). Anexos (bucket attachments). Admin cria usuário com create-user (e-mail, senha, unidade, role) e redefine senha com set-password. Role definida ao criar usuário; sem tela Completar perfil. Tags de pacientes com cores (patient_tag_definitions.color_hex) na listagem de Pacientes.
 
 ---
 
@@ -26,7 +28,7 @@ Ao usar as ferramentas do MCP Supabase (`list_tables`, `execute_sql`, `apply_mig
 
 ---
 
-## Migrations (ordem 00001 → 00027)
+## Migrations (ordem 00001 → 00031)
 
 Todas em `supabase/migrations/`. Aplicar na ordem (via `npx supabase db push` ou SQL Editor).
 
@@ -59,6 +61,10 @@ Todas em `supabase/migrations/`. Aplicar na ordem (via `npx supabase db push` ou
 | 00025_units_tags_events_color.sql | patient_tag_definitions, patient_tag_assignments; units (address, cnpj, phone, email, is_active); events.color_hex; patients.tags |
 | 00026_profiles_extra_fields.sql | profiles.phone, job_title, bio |
 | 00027_schema_cache_sync.sql | Sincronização de colunas (evita schema cache) |
+| 00028_storage_rls_relax_authenticated.sql | Storage: políticas relaxadas para autenticados |
+| 00029_config_job_titles_specialties.sql | config_job_titles, config_specialties (CRUD admin; uso em Meu Perfil para especialidades) |
+| 00030_aba_template_goals.sql | aba_template_goals (metas por template ABA) |
+| 00031_units_cep.sql | units.cep (fuso horário por CEP) |
 
 ---
 
@@ -78,6 +84,7 @@ Todas em `supabase/migrations/`. Aplicar na ordem (via `npx supabase db push` ou
 - **insurances**, **ticket_categories**, **tickets**, **ticket_comments**, **assets**, **organizations**
 - **evaluation_templates**, **evaluation_instances**, **aba_templates**, **aba_programs**, **aba_goals**, **aba_session_data**
 - **note_templates**, **appointment_types**, **treatment_cycles**, **treatment_goals**, **note_goals**, **patient_relatives**
+- **config_job_titles**, **config_specialties** – listas admin (especialidades no perfil; cargos eliminados em favor da role em user_units)
 
 ---
 
@@ -85,9 +92,9 @@ Todas em `supabase/migrations/`. Aplicar na ordem (via `npx supabase db push` ou
 
 | Bucket | Público | Uso |
 |--------|---------|-----|
-| avatars | sim | Fotos de perfil (profiles.avatar_url) |
-| attachments | sim | Anexos de prontuário/chamados/notas |
-| patients | sim | Fotos de pacientes |
+| avatars | sim | Fotos de perfil (profiles.avatar_url). **Importar foto:** Meu Perfil → Enviar foto (lib/avatars.ts). |
+| attachments | sim | Anexos de prontuário/chamados/notas (tabela attachments). |
+| patients | sim | Fotos de pacientes (patients.photo_url). |
 
 Criação: script `frontend/scripts/create-storage-buckets.mjs` (com SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY) ou criar manualmente no Dashboard. Políticas RLS nas migrations 00011, 00012, 00014.
 
@@ -99,8 +106,10 @@ Criação: script `frontend/scripts/create-storage-buckets.mjs` (com SUPABASE_UR
 |------|-----------|-----|
 | invite-user | Convite por e-mail (admin); usa auth.admin.inviteUserByEmail | verify_jwt: true; checa role admin em user_units |
 | reset-password | Gera link de redefinição de senha (admin) | verify_jwt: true; checa role admin em user_units |
+| **create-user** | Cria usuário com e-mail e senha; insere profile e user_units (unidade + role obrigatórios). Body: email, password, full_name?, unit_id, role? | verify_jwt: true; checa admin |
+| **set-password** | Admin redefine senha de um usuário. Body: user_id, new_password | verify_jwt: true; checa admin |
 
-Deploy: `npx supabase functions deploy invite-user` e `npx supabase functions deploy reset-password` (sem --no-verify-jwt). Código em `supabase/functions/invite-user/index.ts` e `supabase/functions/reset-password/index.ts`.
+Deploy: `npx supabase functions deploy invite-user`, `reset-password`, `create-user`, `set-password` (sem --no-verify-jwt). Código em `supabase/functions/`.
 
 ---
 

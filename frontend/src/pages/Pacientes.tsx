@@ -5,6 +5,7 @@ import { useActiveUnit } from '../contexts/ActiveUnitContext';
 import { useUserRoleInUnit } from '../hooks/useUserRoleInUnit';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchPatientsInUnitWithInsurance, fetchPrimaryContactsByPatientIds, type PatientWithInsurance } from '../lib/patients';
+import { fetchPatientTagDefinitions } from '../lib/patientTagDefinitions';
 import { PatientFormModal } from '../components/PatientFormModal';
 import { PatientImportModal } from '../components/PatientImportModal';
 import { EmptyState } from '../components/EmptyState';
@@ -31,6 +32,7 @@ export function Pacientes() {
   const [modalOpen, setModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [editingPatient, setEditingPatient] = useState<PatientWithInsurance | null>(null);
+  const [tagColors, setTagColors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!activeUnitId) return;
@@ -43,6 +45,14 @@ export function Pacientes() {
       setLoading(false);
     });
   }, [activeUnitId]);
+
+  useEffect(() => {
+    fetchPatientTagDefinitions().then(({ definitions }) => {
+      const map: Record<string, string> = {};
+      (definitions ?? []).forEach((d) => { map[d.name] = d.color_hex; });
+      setTagColors(map);
+    });
+  }, []);
 
   const filtered = search.trim()
     ? patients.filter(
@@ -154,7 +164,13 @@ export function Pacientes() {
                   {(p.tags ?? []).length > 0 ? (
                     <span className="pacientes-tags">
                       {(p.tags ?? []).map((t) => (
-                        <span key={t} className="pacientes-tag">{t}</span>
+                        <span
+                          key={t}
+                          className="pacientes-tag"
+                          style={tagColors[t] ? { backgroundColor: tagColors[t], color: '#fff', borderColor: tagColors[t] } : undefined}
+                        >
+                          {t}
+                        </span>
                       ))}
                     </span>
                   ) : (

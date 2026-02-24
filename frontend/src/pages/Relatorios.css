@@ -1,5 +1,7 @@
 .relatorios-page {
   padding: 24px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .relatorios-title {
@@ -90,6 +92,7 @@
 
 .relatorios-table-wrap {
   overflow-x: auto;
+  width: 100%;
   background: var(--color-surface);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
@@ -123,4 +126,14 @@
   text-align: center;
   color: var(--color-text-muted);
   font-size: 0.95rem;
+}
+
+.relatorios-link-evolucao {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.relatorios-link-evolucao:hover {
+  text-decoration: underline;
 }

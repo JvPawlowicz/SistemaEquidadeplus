@@ -1,5 +1,7 @@
 .evolucoes-page {
   padding: 24px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .evolucoes-title {
@@ -48,6 +50,7 @@
 
 .evolucoes-table-wrap {
   overflow-x: auto;
+  width: 100%;
   background: var(--color-surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
@@ -113,18 +116,8 @@
 .evolucoes-empty {
   text-align: center;
   color: var(--color-text-muted);
-  padding: 40px 24px !important;
+  padding: 48px 24px !important;
   font-size: 0.95rem;
-}
-
-.evolucoes-empty::before {
-  content: '';
-  display: block;
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 12px;
-  background: var(--color-border-light);
-  border-radius: 50%;
 }
 
 .evolucoes-btn-open {

@@ -1,5 +1,15 @@
 import { supabase } from './supabase';
 
+export interface AbaTemplateGoal {
+  id: string;
+  template_id: string;
+  name: string;
+  target_type: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AbaTemplate {
   id: string;
   unit_id: string;
@@ -7,6 +17,44 @@ export interface AbaTemplate {
   description: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export async function fetchAbaTemplateGoals(templateId: string) {
+  const { data, error } = await supabase
+    .from('aba_template_goals')
+    .select('*')
+    .eq('template_id', templateId)
+    .order('sort_order');
+  return { goals: (data ?? []) as AbaTemplateGoal[], error: error as Error | null };
+}
+
+export async function createAbaTemplateGoal(templateId: string, params: { name: string; target_type?: string; sort_order?: number }) {
+  const { data, error } = await supabase
+    .from('aba_template_goals')
+    .insert({
+      template_id: templateId,
+      name: params.name.trim(),
+      target_type: params.target_type ?? 'contagem',
+      sort_order: params.sort_order ?? 0,
+    })
+    .select()
+    .single();
+  return { goal: data as AbaTemplateGoal | null, error: error as Error | null };
+}
+
+export async function updateAbaTemplateGoal(id: string, params: { name?: string; target_type?: string; sort_order?: number }) {
+  const { data, error } = await supabase
+    .from('aba_template_goals')
+    .update({ ...params, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+  return { goal: data as AbaTemplateGoal | null, error: error as Error | null };
+}
+
+export async function deleteAbaTemplateGoal(id: string) {
+  const { error } = await supabase.from('aba_template_goals').delete().eq('id', id);
+  return { error: error as Error | null };
 }
 
 export async function fetchAbaTemplatesByUnit(unitId: string) {
