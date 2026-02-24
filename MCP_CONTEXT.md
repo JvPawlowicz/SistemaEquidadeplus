@@ -22,6 +22,8 @@ Para atualizar: `list_migrations`, `list_edge_functions`, `execute_sql` (storage
 
 Ao usar as ferramentas do MCP Supabase (`list_tables`, `execute_sql`, `apply_migration`, `deploy_edge_function`, etc.), use **project_id**: `wwcsmkmwelkgloklbmkw`.
 
+**Variáveis de ambiente (frontend/Render):** ver **docs/env-variaveis.md** (lista completa, URL deste projeto, onde obter chave anon via Dashboard ou MCP `get_publishable_keys`).
+
 ---
 
 ## Migrations (ordem 00001 → 00027)

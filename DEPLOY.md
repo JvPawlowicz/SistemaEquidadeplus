@@ -19,9 +19,9 @@ Com o frontend no **Render** e os dados no **Supabase**, você elimina:
 2. Crie um **Static Site**:
    - **Build Command:** `cd frontend && npm ci && npm run build`
    - **Publish Directory:** `frontend/dist`
-3. Em **Environment** do serviço, adicione:
-   - `VITE_SUPABASE_URL` = URL do projeto Supabase
-   - `VITE_SUPABASE_ANON_KEY` = chave anon do Supabase
+3. Em **Environment** do serviço, adicione (valores do projeto: ver **docs/env-variaveis.md**):
+   - `VITE_SUPABASE_URL` = `https://wwcsmkmwelkgloklbmkw.supabase.co`
+   - `VITE_SUPABASE_ANON_KEY` = chave anon do Supabase (Dashboard → API → anon public, ou via MCP)
 4. Deploy. A URL ficará tipo `https://equidadeplus.onrender.com`.
 
 **Se a página ficar em branco:** as variáveis são usadas no **momento do build**. Confira em **Environment** se `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` estão preenchidos e faça um **novo deploy** (Manual Deploy ou novo push). Depois do deploy com variáveis corretas, a tela de login deve aparecer (ou uma mensagem clara de configuração).

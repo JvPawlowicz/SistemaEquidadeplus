@@ -124,6 +124,7 @@ Ou use `docker-compose.yml` com as variáveis em `.env`.
 - [docs/06-supabase-setup.md](docs/06-supabase-setup.md) — Setup do projeto Supabase
 - [docs/08-aplicar-migrations-sql-editor.md](docs/08-aplicar-migrations-sql-editor.md) — Aplicar migrations pelo SQL Editor
 - [docs/10-usuarios-teste-e-verificacao-blueprint.md](docs/10-usuarios-teste-e-verificacao-blueprint.md) — Usuários de teste e verificação
+- [docs/env-variaveis.md](docs/env-variaveis.md) — **Variáveis de ambiente** (lista completa, projeto em uso, onde obter chaves)
 
 ---
 
