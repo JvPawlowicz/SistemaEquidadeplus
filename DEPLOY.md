@@ -24,6 +24,8 @@ Com o frontend no **Render** e os dados no **Supabase**, você elimina:
    - `VITE_SUPABASE_ANON_KEY` = chave anon do Supabase
 4. Deploy. A URL ficará tipo `https://equidadeplus.onrender.com`.
 
+**Se a página ficar em branco:** as variáveis são usadas no **momento do build**. Confira em **Environment** se `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` estão preenchidos e faça um **novo deploy** (Manual Deploy ou novo push). Depois do deploy com variáveis corretas, a tela de login deve aparecer (ou uma mensagem clara de configuração).
+
 ## 3. CORS e URL no Supabase
 
 No Supabase: **Authentication → URL Configuration** (ou **Settings → API**):
